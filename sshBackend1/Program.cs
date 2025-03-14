@@ -1,37 +1,77 @@
-using NLog.Web;
-using NLog;
-using sshBackend1;
-using sshBackend1;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
-using QuestPDF.Infrastructure; //per me bo raporte pdf
-using System.ComponentModel;
+using sshBackend1.Data;
 
-//NOTE: Add dependencies/services in StartupExtensions.cs and keep this file as-is
-
-var builder = WebApplication.CreateBuilder(args);
-var logger = LogManager.Setup().GetCurrentClassLogger();
-
-try
+public class Program
 {
-    logger.Debug("init main");
-    builder.Host.UseNLog(new NLogAspNetCoreOptions() { RemoveLoggerFactoryFilter = false });
+    public static void Main(string[] args)
+    {
+        // Create and run the web host for the application
+        CreateHostBuilder(args).Build().Run();
+    }
 
-    QuestPDF.Settings.License = LicenseType.Community;
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.ConfigureServices((context, services) =>
+                {
+                    // Add DbContext to the DI container
+                    services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseSqlServer(
+                            context.Configuration.GetConnectionString("DefaultConnection")));  // Change if you're using another DB
 
-    var app = builder.ConfigureServices().ConfigurePipeline();
-    app.Run();
-}
-catch (Exception exception)
-{
-    // NLog: catch setup errors
-    logger.Error(exception, "Stopped program because of exception");
-    throw;
-}
-finally
-{
-    // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
-    NLog.LogManager.Shutdown();
-}
+                    // Add services for controllers (API)
+                    services.AddControllers();
 
-public partial class Program { }
+                    // Add CORS policy to allow frontend access
+                    services.AddCors(options =>
+                    {
+                        options.AddPolicy("AllowFrontend", builder =>
+                            builder.WithOrigins("http://localhost:3000")  
+                                   .AllowAnyHeader()
+                                   .AllowAnyMethod());
+                    });
+
+                    // Optionally add other services like authentication, logging, etc.
+                });
+
+                webBuilder.Configure(app =>
+                {
+                    var env = app.ApplicationServices.GetService<IWebHostEnvironment>();
+
+                    // Configure middleware
+                    if (env.IsDevelopment())
+                    {
+                        // Show detailed error pages in development
+                        app.UseDeveloperExceptionPage();
+                    }
+                    else
+                    {
+                        // In production, use a more secure error handling strategy
+                        app.UseExceptionHandler("/Home/Error");
+                        app.UseHsts();
+                    }
+
+                    // Enable CORS middleware
+                    app.UseCors("AllowFrontend");
+
+                    // Enable routing
+                    app.UseRouting();
+
+                    // Enable authentication and authorization middleware (if needed)
+                    app.UseAuthentication();
+                    app.UseAuthorization();
+
+                    // Map controller routes
+                    app.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapControllers(); // API controllers
+                    });
+                });
+            });
+}
 
