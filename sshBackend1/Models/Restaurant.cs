@@ -1,5 +1,4 @@
-﻿using sshBackend1.Data.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace sshBackend1.Models

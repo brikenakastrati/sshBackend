@@ -1,4 +1,6 @@
 ﻿using System;
+using sshBackend1.Models;
+
 
 namespace sshBackend1.Models
 {

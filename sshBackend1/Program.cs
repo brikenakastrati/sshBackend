@@ -1,28 +1,30 @@
-using EFCoreMigrationsDemo.Data;
+using sshBackend1;
 using Microsoft.EntityFrameworkCore;
-using sshBackend1.Data.Models;
 
+using sshBackend1.Data;
 var builder = WebApplication.CreateBuilder(args);
 
-// Add DbContext to the container using the connection string from appsettings.json
+// Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection")));
 
-// Configure Identity to use the custom Users model
-builder.Services.AddDefaultIdentity<Users>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// Add other services, such as controllers, etc.
-builder.Services.AddControllersWithViews();
-
+builder.Services.AddControllers(option => { }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
-app.UseAuthentication();
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();
 
 app.Run();

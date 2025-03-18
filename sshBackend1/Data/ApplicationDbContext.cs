@@ -1,37 +1,49 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
-using sshBackend1.Data.Models;
+using sshBackend1.Models;
+namespace sshBackend1.Data
 
-namespace EFCoreMigrationsDemo.Data
 {
-    // Use the Users class for IdentityUser customization
-    public class ApplicationDbContext : IdentityDbContext<Users>  // Use 'Users' as the custom user class
+    public class ApplicationDbContext:DbContext
     {
-        private readonly IConfiguration _configuration;
-
-        // Constructor with DbContextOptions and IConfiguration injection
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration)
-            : base(options)
-        {
-            _configuration = configuration;
-        }
-
-        // Parameterless constructor for EF Core at design time (for migrations)
-        public ApplicationDbContext() { }
-
-        // Configure the DbContext to use SQL Server with the connection string from appsettings.json
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                // Get the connection string from appsettings.json
-                var connectionString = _configuration.GetConnectionString("DefaultConnection");
-                optionsBuilder.UseSqlServer(connectionString);
-            }
+            optionsBuilder
+                .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
 
-        // Optionally: Add DbSet properties for other models (like Product, Orders, etc.)
-        // public DbSet<Product> Products { get; set; }
+        }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<Florist> Florists { get; set; }
+        public DbSet<FlowerArrangement> FlowerArrangements { get; set; }
+        public DbSet<FlowerArrangementOrder> FlowerArrangementOrders { get; set; }
+        public DbSet<FlowerArrangementType> FlowerArrangementTypes { get; set; }
+        public DbSet<Guest> Guests { get; set; }
+        public DbSet<GuestStatus> GuestStatuses { get; set; }
+        public DbSet<Menu> Menu { get; set; }
+        public DbSet<MenuOrder> MenuOrders { get; set; }
+        public DbSet<MenuType> MenuTypes { get; set; }
+        public DbSet<MusicProvider> MusicProviders { get; set; }
+        public DbSet<MusicProviderOrder> MusicProviderOrders { get; set; }
+        public DbSet<OrderStatus> OrderStatuses { get; set; }
+        public DbSet<PartnerStatus> PartnerStatuses { get; set; }
+        public DbSet<Pastry> Pastries { get; set; }
+        public DbSet<PastryShop> PastryShops { get; set; }
+        public DbSet<PastryOrder> PastryOrders { get; set; }
+        public DbSet<PerformerType> PerformerTypes { get; set; }
+        public DbSet<PlaylistItem> PlaylistItems { get; set; }
+        public DbSet<Restaurant> Restaurants{ get; set; }
+        public DbSet<RestaurantStatus> RestaurantStatuses{ get; set; }
+        public DbSet<Table> Tables { get; set; }
+        public DbSet<Users> TableStatuses { get; set; }
+        public DbSet<Venue> Venues { get; set; }
+        public DbSet<VenueOrder> VenueOrders { get; set; }
+        public DbSet<VenueType> VenueTypes { get; set; }
+        public DbSet<VenueProvider> VenueProviders { get; set; }
+
     }
 }

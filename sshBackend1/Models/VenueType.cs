@@ -1,9 +1,7 @@
-﻿
-using sshBackend1.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace RPPP_WebApp.Models;
+namespace sshBackend1.Models;
 
 public partial class VenueType
 {
