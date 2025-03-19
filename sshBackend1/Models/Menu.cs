@@ -2,11 +2,13 @@
 using sshBackend1.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace sshBackend1.Models;
 
 public partial class Menu
 {
+    [Key]
     public int MenuId { get; set; }
 
     public string MenuName { get; set; }

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace sshBackend1.Models;
 
 public partial class Guest
 {
+    [Key]
     public int GuestId { get; set; }
 
     public string GuestName { get; set; }

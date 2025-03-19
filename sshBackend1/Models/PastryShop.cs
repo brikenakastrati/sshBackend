@@ -2,11 +2,13 @@
 using sshBackend1.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace sshBackend1.Models;
 
 public partial class PastryShop
 {
+    [Key]
     public int ShopId { get; set; }
 
     public string ShopName { get; set; }

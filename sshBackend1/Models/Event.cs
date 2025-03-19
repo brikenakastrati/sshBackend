@@ -2,11 +2,13 @@
 using sshBackend1.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace sshBackend1.Models;
 
 public partial class Event
 {
+    [Key]
     public int EventId { get; set; }
 
     public string EventName { get; set; }

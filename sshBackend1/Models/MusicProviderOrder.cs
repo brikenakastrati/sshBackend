@@ -2,11 +2,13 @@
 using sshBackend1.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace sshBackend1.Models;
 
 public partial class MusicProviderOrder
 {
+    [Key]
     public int MusicProviderOrderId { get; set; }
 
     public string OrderName { get; set; }

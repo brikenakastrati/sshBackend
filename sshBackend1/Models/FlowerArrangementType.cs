@@ -3,11 +3,13 @@
 using sshBackend1.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace sshBackend1.Models;
 
 public partial class FlowerArrangementType
 {
+    [Key]
     public int FlowerArrangementTypeId { get; set; }
 
     public string Name { get; set; }
