@@ -14,4 +14,7 @@ public partial class GuestStatus
     public string GuestStatusName { get; set; }
 
     public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
+
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
 }

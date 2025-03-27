@@ -11,6 +11,9 @@ namespace sshBackend1.Models
         public string PhoneNumber { get; set; } // Restaurant's contact number
         public int? RestaurantStatusId { get; set; } // Foreign key for the restaurant's status (open/closed)
 
+        // Fusha për multi-tenancy
+        public string TenantId { get; set; }
+
         // Foreign Key to connect the Restaurant to the Venue
         public int VenueId { get; set; } // Foreign Key to Venue
         public virtual Venue Venue { get; set; } // Navigation property to access the related Venue

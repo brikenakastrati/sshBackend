@@ -14,4 +14,7 @@ public partial class PerformerType
     public string Name { get; set; }
 
     public virtual ICollection<MusicProvider> MusicProviders { get; set; } = new List<MusicProvider>();
+
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
 }

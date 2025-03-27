@@ -22,4 +22,7 @@ public partial class Pastry
     public virtual PastryType PastryType { get; set; }
 
     public virtual PastryShop Shop { get; set; }
+
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
 }

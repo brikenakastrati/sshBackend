@@ -1,12 +1,12 @@
-﻿
-using sshBackend1.Models;
+﻿using sshBackend1.Models;
+using sshBackend1.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace sshBackend1.Models;
 
-public partial class Event
+public partial class Event : ITenantEntity
 {
     [Key]
     public int EventId { get; set; }
@@ -15,20 +15,21 @@ public partial class Event
 
     public int? EventTypeId { get; set; }
 
-   
+    public DateTime? EventDate { get; set; }
 
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
 
+    // Koleksionet e lidhura (të çkomentuara nëse nevojiten)
+    public virtual ICollection<FlowerArrangementOrder> FlowerArrangementOrders { get; set; } = new List<FlowerArrangementOrder>();
 
-    //public virtual ICollection<FlowerArrangementOrder> FlowerArrangementOrders { get; set; } = new List<FlowerArrangementOrder>();
+    public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
 
-  
-    //public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
+    public virtual ICollection<MenuOrder> MenuOrders { get; set; } = new List<MenuOrder>();
 
-    //public virtual ICollection<MenuOrder> MenuOrders { get; set; } = new List<MenuOrder>();
+    public virtual ICollection<MusicProviderOrder> MusicProviderOrders { get; set; } = new List<MusicProviderOrder>();
 
-    //public virtual ICollection<MusicProviderOrder> MusicProviderOrders { get; set; } = new List<MusicProviderOrder>();
+    public virtual ICollection<PastryOrder> PastryOrders { get; set; } = new List<PastryOrder>();
 
-    //public virtual ICollection<PastryOrder> PastryOrders { get; set; } = new List<PastryOrder>();
-
-    //public virtual ICollection<VenueOrder> VenueOrders { get; set; } = new List<VenueOrder>();
+    public virtual ICollection<VenueOrder> VenueOrders { get; set; } = new List<VenueOrder>();
 }

@@ -31,4 +31,7 @@ public partial class VenueOrder
     public virtual OrderStatus OrderStatus { get; set; }
 
     public virtual Venue Venue { get; set; }
+
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
 }

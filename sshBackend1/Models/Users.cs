@@ -12,5 +12,8 @@ namespace sshBackend1.Models
         public DateTime DateOfBirth { get; set; }
         public string ProfilePictureUrl { get; set; }
 
+        // Fusha për multi-tenancy
+        public string TenantId { get; set; }
+
     }
 }

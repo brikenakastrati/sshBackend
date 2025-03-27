@@ -26,4 +26,7 @@ public partial class Guest
     public virtual GuestStatus GuestStatus { get; set; }
 
     public virtual Table Table { get; set; }
+
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
 }

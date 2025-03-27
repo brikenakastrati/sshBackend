@@ -27,4 +27,7 @@ public partial class PlaylistItem
  
 
     public virtual MusicProvider MusicProvider { get; set; }
+
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
 }

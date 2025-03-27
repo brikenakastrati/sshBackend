@@ -15,4 +15,7 @@ public partial class FlowerArrangementType
     public string Name { get; set; }
 
     public virtual ICollection<FlowerArrangement> FlowerArrangements { get; set; } = new List<FlowerArrangement>();
+
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
 }

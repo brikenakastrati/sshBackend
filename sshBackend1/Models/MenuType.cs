@@ -14,4 +14,7 @@ public partial class MenuType
     public string TypeName { get; set; }
 
     public virtual ICollection<Menu> Menus { get; set; } = new List<Menu>();
+
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
 }

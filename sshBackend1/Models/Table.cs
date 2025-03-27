@@ -11,5 +11,8 @@ namespace sshBackend1.Models
         //public virtual Event Event { get; set; }
         //public virtual TableStatus TableStatus { get; set; }
         //public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
+
+        // Fusha për multi-tenancy
+        public string TenantId { get; set; }
     }
 }

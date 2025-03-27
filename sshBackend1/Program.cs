@@ -2,11 +2,13 @@ using sshBackend1;
 using Microsoft.EntityFrameworkCore;
 
 using sshBackend1.Data;
+using sshBackend1.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection")));
+
 
 
 builder.Services.AddControllers(option => { }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();

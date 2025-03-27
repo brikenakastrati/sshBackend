@@ -19,6 +19,9 @@ public partial class FlowerArrangement
 
     public int FlowerArrangementTypeId { get; set; }
 
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
+
     public virtual Florist Florist { get; set; }
 
     public virtual FlowerArrangementType FlowerArrangementType { get; set; }

@@ -1,12 +1,12 @@
-﻿    
-using sshBackend1.Models;
+﻿using sshBackend1.Models;
+using sshBackend1.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace sshBackend1.Models;
 
-public partial class Florist
+public partial class Florist : ITenantEntity
 {
     [Key]
     public int FloristId { get; set; }
@@ -22,6 +22,9 @@ public partial class Florist
     public decimal? AgencyFee { get; set; }
 
     public int? PartnerStatusId { get; set; }
+
+    // Fusha për multi-tenancy
+    public string TenantId { get; set; }
 
     public virtual ICollection<FlowerArrangement> FlowerArrangements { get; set; } = new List<FlowerArrangement>();
 
