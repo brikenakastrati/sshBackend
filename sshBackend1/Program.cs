@@ -1,20 +1,25 @@
 using sshBackend1;
 using Microsoft.EntityFrameworkCore;
-
 using sshBackend1.Data;
+using sshBackend1.Repository.IRepository;
+using sshBackend1.Repository;
 using sshBackend1.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ? Add services to the container **before** calling `builder.Build()`
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection")));
 
+builder.Services.AddScoped<IEventRepository, EventRepository>(); // ? Moved here
+builder.Services.AddAutoMapper(typeof(MappingConfig)); // ? Moved here
 
-
-builder.Services.AddControllers(option => { }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
+// ? Add controllers and API formatters
+builder.Services.AddControllers().AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-var app = builder.Build();
+
+var app = builder.Build(); // ?? Do not register services after this!
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -24,9 +29,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
