@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace sshBackend1.Models;
 
-public partial class Event : ITenantEntity
+public class Event 
 {
     [Key]
     public int EventId { get; set; }
@@ -17,10 +17,7 @@ public partial class Event : ITenantEntity
 
     public DateTime? EventDate { get; set; }
 
-    // Fusha për multi-tenancy
     public string TenantId { get; set; }
-
-    // Koleksionet e lidhura (të çkomentuara nëse nevojiten)
     public virtual ICollection<FlowerArrangementOrder> FlowerArrangementOrders { get; set; } = new List<FlowerArrangementOrder>();
 
     public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
