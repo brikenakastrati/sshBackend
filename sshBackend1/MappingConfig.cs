@@ -14,6 +14,9 @@ namespace sshBackend1
 
             CreateMap<Florist, FloristDTO>();
             CreateMap<FloristDTO, Florist>();
+
+            CreateMap<VenueProvider, VenueProviderDTO>();
+            CreateMap<VenueProviderDTO, VenueProvider>();
         }
     }
 }

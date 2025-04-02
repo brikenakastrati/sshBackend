@@ -998,7 +998,7 @@ namespace sshBackend1.Migrations
 
                     b.HasIndex("PartnerStatusId");
 
-                    b.ToTable("VenueProviders");
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("sshBackend1.Models.VenueType", b =>
@@ -1259,7 +1259,7 @@ namespace sshBackend1.Migrations
             modelBuilder.Entity("sshBackend1.Models.VenueProvider", b =>
                 {
                     b.HasOne("sshBackend1.Models.PartnerStatus", "PartnerStatus")
-                        .WithMany("VenueProviders")
+                        .WithMany("Events")
                         .HasForeignKey("PartnerStatusId");
 
                     b.Navigation("PartnerStatus");
@@ -1326,7 +1326,7 @@ namespace sshBackend1.Migrations
 
                     b.Navigation("PastryShops");
 
-                    b.Navigation("VenueProviders");
+                    b.Navigation("Events");
                 });
 
             modelBuilder.Entity("sshBackend1.Models.PastryShop", b =>
