@@ -1,44 +1,39 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using sshBackend1.Data;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace sshBackend1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class VenueProviderController : ControllerBase
+    public class VenueTypeController : ControllerBase
     {
-
         protected APIResponse _response;
-        private readonly IVenueProviderRepository _dbVenueProvider;
+        private readonly IVenueTypeRepository _dbVenueType;
         private readonly IMapper _mapper;
 
-        public VenueProviderController(IVenueProviderRepository dbVenueProvider, IMapper mapper)
+        public VenueTypeController(IVenueTypeRepository dbVenueType, IMapper mapper)
         {
-            _dbVenueProvider = dbVenueProvider;
+            _dbVenueType = dbVenueType;
             _mapper = mapper;
             _response = new();
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<APIResponse>> GetVenueProviders()
+        public async Task<ActionResult<APIResponse>> GetVenueTypes()
         {
             try
             {
-                IEnumerable<VenueProvider> venueProviderList = await _dbVenueProvider.GetAllAsync();
-                _response.Result = _mapper.Map<List<VenueProviderDTO>>(venueProviderList);
+                IEnumerable<VenueType> venueTypeList = await _dbVenueType.GetAllAsync();
+                _response.Result = _mapper.Map<List<VenueTypeDTO>>(venueTypeList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -50,11 +45,11 @@ namespace sshBackend1.Controllers
             }
         }
 
-        [HttpGet("{id:int}", Name = "GetVenueProvider")]
+        [HttpGet("{id:int}", Name = "GetVenueType")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<APIResponse>> GetVenueProvider(int id)
+        public async Task<ActionResult<APIResponse>> GetVenueType(int id)
         {
             try
             {
@@ -64,14 +59,14 @@ namespace sshBackend1.Controllers
                     return BadRequest(_response);
                 }
 
-                var VenueProviderEntity = await _dbVenueProvider.GetAsync(u => u.VenueProviderId == id);
-                if (VenueProviderEntity == null)
+                var venueTypeEntity = await _dbVenueType.GetAsync(u => u.VenueTypeId == id);
+                if (venueTypeEntity == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
 
-                _response.Result = _mapper.Map<VenueProviderDTO > (VenueProviderEntity);
+                _response.Result = _mapper.Map<VenueTypeDTO>(venueTypeEntity);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -87,27 +82,27 @@ namespace sshBackend1.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<APIResponse>> CreateVenueProvider([FromBody] VenueProviderDTO createDTO)
+        public async Task<ActionResult<APIResponse>> CreateVenueType([FromBody] VenueTypeDTO createDTO)
         {
             try
             {
                 if (createDTO == null)
                 {
-                    return BadRequest("Invalid Venue Provider data.");
+                    return BadRequest("Invalid Venue Type data.");
                 }
 
-                if (await _dbVenueProvider.GetAsync(u => u.Name.ToLower() == createDTO.Name.ToLower()) != null)
+                if (await _dbVenueType.GetAsync(u => u.Name.ToLower() == createDTO.Name.ToLower()) != null)
                 {
-                    ModelState.AddModelError("ErrorsMessages", "Venue Provider already exists!");
+                    ModelState.AddModelError("ErrorsMessages", "Venue Type already exists!");
                     return BadRequest(ModelState);
                 }
 
-                VenueProvider venueProviderEntity = _mapper.Map<VenueProvider>(createDTO);
-                await _dbVenueProvider.CreateAsync(venueProviderEntity);
+                VenueType venueTypeEntity = _mapper.Map<VenueType>(createDTO);
+                await _dbVenueType.CreateAsync(venueTypeEntity);
 
-                _response.Result = _mapper.Map<VenueProviderDTO>(venueProviderEntity);
+                _response.Result = _mapper.Map<VenueTypeDTO>(venueTypeEntity);
                 _response.StatusCode = HttpStatusCode.Created;
-                return CreatedAtRoute("GetVenueProvider", new { id = venueProviderEntity.VenueProviderId }, _response);
+                return CreatedAtRoute("GetVenueType", new { id = venueTypeEntity.VenueTypeId }, _response);
             }
             catch (Exception ex)
             {
@@ -117,11 +112,11 @@ namespace sshBackend1.Controllers
             }
         }
 
-        [HttpDelete("{id:int}", Name = "DeleteVenueProvider")]
+        [HttpDelete("{id:int}", Name = "DeleteVenueType")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<APIResponse>> DeleteVenueProvider(int id)
+        public async Task<ActionResult<APIResponse>> DeleteVenueType(int id)
         {
             try
             {
@@ -131,14 +126,14 @@ namespace sshBackend1.Controllers
                     return BadRequest(_response);
                 }
 
-                var venueProviderEntity = await _dbVenueProvider.GetAsync(u => u.VenueProviderId == id);
-                if (venueProviderEntity == null)
+                var venueTypeEntity = await _dbVenueType.GetAsync(u => u.VenueTypeId == id);
+                if (venueTypeEntity == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
 
-                await _dbVenueProvider.DeleteVenueProviderAsync(venueProviderEntity);
+                await _dbVenueType.DeleteVenueTypeAsync(venueTypeEntity);
 
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
@@ -155,19 +150,19 @@ namespace sshBackend1.Controllers
 
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpPut("{id:int}", Name = "UpdateVenueProvider")]
-        public async Task<ActionResult<APIResponse>> UpdateVenueProvider(int id, [FromBody] VenueProviderDTO updateDTO)
+        [HttpPut("{id:int}", Name = "UpdateVenueType")]
+        public async Task<ActionResult<APIResponse>> UpdateVenueType(int id, [FromBody] VenueTypeDTO updateDTO)
         {
             try
             {
-                if (updateDTO == null || id != updateDTO.VenueProviderId)
+                if (updateDTO == null || id != updateDTO.VenueTypeId)
                 {
                     return BadRequest();
                 }
 
-                VenueProvider model = _mapper.Map<VenueProvider>(updateDTO);
+                VenueType model = _mapper.Map<VenueType>(updateDTO);
 
-                await _dbVenueProvider.UpdateVenueProviderAsync(model);
+                await _dbVenueType.UpdateVenueTypeAsync(model);
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
                 return Ok(_response);
@@ -181,35 +176,37 @@ namespace sshBackend1.Controllers
 
         }
 
-        [HttpPatch("{id:int}", Name = "UpdatePartialVenueProvider")]
+        [HttpPatch("{id:int}", Name = "UpdatePartialVenueType")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdatePartialVenueProvider(int id, JsonPatchDocument<VenueProviderDTO> patchDTO)
+        public async Task<IActionResult> UpdatePartialVenueType(int id, JsonPatchDocument<VenueTypeDTO> patchDTO)
         {
             if (patchDTO == null || id == 0)
             {
                 return BadRequest();
-
             }
 
-            var venueProvider = await _dbVenueProvider.GetAsync(u => u.VenueProviderId == id, tracked: false);
+            var venueTypeEntity = await _dbVenueType.GetAsync(u => u.VenueTypeId == id, tracked: false);
 
-            VenueProviderDTO venueProviderDTO = _mapper.Map<VenueProviderDTO>(venueProvider);
-
-            if (venueProvider == null)
+            if (venueTypeEntity == null)
             {
                 return BadRequest();
             }
-            patchDTO.ApplyTo(venueProviderDTO, ModelState);
-            VenueProvider model = _mapper.Map<VenueProvider>(venueProviderDTO);
 
-            await _dbVenueProvider.UpdateVenueProviderAsync(model);
+            VenueTypeDTO venueTypeDTO = _mapper.Map<VenueTypeDTO>(venueTypeEntity);
+            patchDTO.ApplyTo(venueTypeDTO, ModelState);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
+            VenueType model = _mapper.Map<VenueType>(venueTypeDTO);
+            await _dbVenueType.UpdateVenueTypeAsync(model);
+
             return NoContent();
         }
+
+
     }
 }

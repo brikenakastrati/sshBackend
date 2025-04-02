@@ -166,7 +166,7 @@ namespace sshBackend1.Controllers
 
                 Florist model = _mapper.Map<Florist>(updateDTO);
 
-                _dbFlorist.UpdateFloristAsync(model);
+                await _dbFlorist.UpdateFloristAsync(model);
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
                 return Ok(_response);

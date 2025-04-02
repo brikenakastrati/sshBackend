@@ -17,6 +17,9 @@ namespace sshBackend1
 
             CreateMap<VenueProvider, VenueProviderDTO>();
             CreateMap<VenueProviderDTO, VenueProvider>();
+
+            CreateMap<VenueType, VenueTypeDTO>();
+            CreateMap<VenueTypeDTO, VenueType>();
         }
     }
 }

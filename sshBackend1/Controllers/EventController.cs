@@ -162,7 +162,7 @@ namespace sshBackend1.Controllers
 
                 Event model = _mapper.Map<Event>(updateDTO);
 
-                _dbEvent.UpdateEventAsync(model);
+                await _dbEvent.UpdateEventAsync(model);
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
                 return Ok(_response);
