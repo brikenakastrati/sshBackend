@@ -12,6 +12,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection")));
 
 builder.Services.AddScoped<IEventRepository, EventRepository>(); // ? Moved here
+builder.Services.AddScoped<IFloristRepository, FloristRepository>();
+
 builder.Services.AddAutoMapper(typeof(MappingConfig)); // ? Moved here
 
 // ? Add controllers and API formatters

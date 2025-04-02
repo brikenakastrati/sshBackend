@@ -179,33 +179,34 @@ namespace sshBackend1.Controllers
         [HttpPatch("{id:int}", Name = "UpdatePartialEvent")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdatePartialVilla(int id, JsonPatchDocument<EventDTO> patchDTO)
+        public async Task<IActionResult> UpdatePartialEvent(int id, JsonPatchDocument<EventDTO> patchDTO)
         {
             if (patchDTO == null || id == 0)
             {
                 return BadRequest();
-
             }
 
-            var villa = await _dbEvent.GetAsync(u => u.EventId == id, tracked: false);
+            var eventEntity = await _dbEvent.GetAsync(u => u.EventId == id, tracked: false);
 
-            EventDTO villaDTO = _mapper.Map<EventDTO>(villa);
-
-            if (villa == null)
+            if (eventEntity == null)
             {
                 return BadRequest();
             }
-            patchDTO.ApplyTo(villaDTO, ModelState);
-            Event model = _mapper.Map<Event>(villaDTO);
 
-            await _dbEvent.UpdateEventAsync(model);
+            EventDTO eventDTO = _mapper.Map<EventDTO>(eventEntity);
+            patchDTO.ApplyTo(eventDTO, ModelState);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
+            Event model = _mapper.Map<Event>(eventDTO);
+            await _dbEvent.UpdateEventAsync(model);
+
             return NoContent();
         }
+
 
     }
 }
