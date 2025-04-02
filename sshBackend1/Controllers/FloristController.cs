@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using sshBackend1.Data;
 using sshBackend1.Models;
+using sshBackend1.Models.DTOs;
+using sshBackend1.Repository.IRepository;
 
 namespace sshBackend1.Controllers
 {
@@ -14,95 +19,197 @@ namespace sshBackend1.Controllers
     [ApiController]
     public class FloristController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        protected APIResponse _response;
+        private readonly IFloristRepository _dbFlorist;
+        private readonly IMapper _mapper;
 
-        public FloristController(ApplicationDbContext context)
+        public FloristController(IFloristRepository dbFlorist, IMapper mapper)
         {
-            _context = context;
+            _dbFlorist = dbFlorist;
+            _mapper = mapper;
+            _response = new();
         }
 
-        // GET: api/Florist
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Florist>>> GetFlorists()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetFlorists()
         {
-            return await _context.Florists.ToListAsync();
+            try
+            {
+                IEnumerable<Florist> floristList = await _dbFlorist.GetAllAsync();
+                _response.Result = _mapper.Map<List<FloristDTO>>(floristList);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
         }
 
-        // GET: api/Florist/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Florist>> GetFlorist(int id)
+        [HttpGet("{id:int}", Name = "GetFlorist")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> GetFlorist(int id)
         {
-            var florist = await _context.Florists.FindAsync(id);
-
-            if (florist == null)
+            try
             {
-                return NotFound();
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var floristEntity = await _dbFlorist.GetAsync(u => u.FloristId == id);
+                if (floristEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                _response.Result = _mapper.Map<FloristDTO>(floristEntity);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> CreateFlorist([FromBody] FloristDTO createDTO)
+        {
+            try
+            {
+                if (createDTO == null)
+                {
+                    return BadRequest("Invalid florist data.");
+                }
+
+                if (await _dbFlorist.GetAsync(u => u.Name.ToLower() == createDTO.Name.ToLower()) != null)
+                {
+                    ModelState.AddModelError("ErrorsMessages", "Florist already exists!");
+                    return BadRequest(ModelState);
+                }
+
+                Florist floristEntity = _mapper.Map<Florist>(createDTO);
+                await _dbFlorist.CreateAsync(floristEntity);
+
+                _response.Result = _mapper.Map<FloristDTO>(floristEntity);
+                _response.StatusCode = HttpStatusCode.Created;
+                return CreatedAtRoute("GetFlorist", new { id = floristEntity.FloristId }, _response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpDelete("{id:int}", Name = "DeleteFlorist")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> DeleteFlorist(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var floristEntity = await _dbFlorist.GetAsync(u => u.FloristId == id);
+                if (floristEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                await _dbFlorist.DeleteFloristAsync(floristEntity);
+
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpPut("{id:int}", Name = "UpdateFlorist")]
+        public async Task<ActionResult<APIResponse>> UpdateFlorist(int id, [FromBody] FloristDTO updateDTO)
+        {
+            try
+            {
+                if (updateDTO == null || id != updateDTO.FloristId)
+                {
+                    return BadRequest();
+                }
+
+                Florist model = _mapper.Map<Florist>(updateDTO);
+
+                _dbFlorist.UpdateFloristAsync(model);
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
 
-            return florist;
         }
 
-        // PUT: api/Florist/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutFlorist(int id, Florist florist)
+        [HttpPatch("{id:int}", Name = "UpdatePartialFlorist")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdatePartialFlorist(int id, JsonPatchDocument<FloristDTO> patchDTO)
         {
-            if (id != florist.FloristId)
+            if (patchDTO == null || id == 0)
+            {
+                return BadRequest();
+
+            }
+
+            var florist = await _dbFlorist.GetAsync(u => u.FloristId == id, tracked: false);
+
+            FloristDTO floristDTO = _mapper.Map<FloristDTO>(florist);
+
+            if (florist == null)
             {
                 return BadRequest();
             }
+            patchDTO.ApplyTo(floristDTO, ModelState);
+            Florist model = _mapper.Map<Florist>(floristDTO);
 
-            _context.Entry(florist).State = EntityState.Modified;
+            await _dbFlorist.UpdateFloristAsync(model);
 
-            try
+            if (!ModelState.IsValid)
             {
-                await _context.SaveChangesAsync();
+                return BadRequest(ModelState);
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FloristExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
             return NoContent();
         }
 
-        // POST: api/Florist
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Florist>> PostFlorist(Florist florist)
-        {
-            _context.Florists.Add(florist);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetFlorist", new { id = florist.FloristId }, florist);
-        }
-
-        // DELETE: api/Florist/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFlorist(int id)
-        {
-            var florist = await _context.Florists.FindAsync(id);
-            if (florist == null)
-            {
-                return NotFound();
-            }
-
-            _context.Florists.Remove(florist);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool FloristExists(int id)
-        {
-            return _context.Florists.Any(e => e.FloristId == id);
-        }
     }
 }
