@@ -27,7 +27,7 @@ namespace sshBackend1.Migrations
 
             migrationBuilder.AddColumn<string>(
                 name: "TenantId",
-                table: "VenueProviders",
+                table: "Events",
                 type: "nvarchar(max)",
                 nullable: false,
                 defaultValue: "");
@@ -226,7 +226,7 @@ namespace sshBackend1.Migrations
 
             migrationBuilder.DropColumn(
                 name: "TenantId",
-                table: "VenueProviders");
+                table: "Events");
 
             migrationBuilder.DropColumn(
                 name: "TenantId",

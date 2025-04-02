@@ -18,6 +18,7 @@ namespace sshBackend1.Data
 
         }
         public DbSet<Event> Events { get; set; }
+
         public DbSet<Florist> Florists { get; set; }
         public DbSet<FlowerArrangement> FlowerArrangements { get; set; }
         public DbSet<FlowerArrangementOrder> FlowerArrangementOrders { get; set; }

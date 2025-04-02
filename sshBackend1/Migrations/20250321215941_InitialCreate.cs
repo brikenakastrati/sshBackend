@@ -336,7 +336,7 @@ namespace sshBackend1.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "VenueProviders",
+                name: "Events",
                 columns: table => new
                 {
                     VenueProviderId = table.Column<int>(type: "int", nullable: false)
@@ -462,7 +462,7 @@ namespace sshBackend1.Migrations
                     table.ForeignKey(
                         name: "FK_Venues_VenueProviders_VenueProviderId",
                         column: x => x.VenueProviderId,
-                        principalTable: "VenueProviders",
+                        principalTable: "Events",
                         principalColumn: "VenueProviderId");
                     table.ForeignKey(
                         name: "FK_Venues_VenueTypes_VenueTypeId",
@@ -781,7 +781,7 @@ namespace sshBackend1.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_VenueProviders_PartnerStatusId",
-                table: "VenueProviders",
+                table: "Events",
                 column: "PartnerStatusId");
 
             migrationBuilder.CreateIndex(
@@ -874,7 +874,7 @@ namespace sshBackend1.Migrations
                 name: "PerformerTypes");
 
             migrationBuilder.DropTable(
-                name: "VenueProviders");
+                name: "Events");
 
             migrationBuilder.DropTable(
                 name: "VenueTypes");
