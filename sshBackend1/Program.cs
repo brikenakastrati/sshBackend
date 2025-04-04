@@ -14,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IEventRepository, EventRepository>(); 
 builder.Services.AddScoped<IFloristRepository, FloristRepository>();
 builder.Services.AddScoped<IVenueProviderRepository, VenueProviderRepository>();
+builder.Services.AddScoped<IVenueTypeRepository, VenueTypeRepository>();
 builder.Services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
 
 
