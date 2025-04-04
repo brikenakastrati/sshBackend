@@ -8,6 +8,8 @@ using System.Net;
 
 namespace sshBackend1.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class OrderStatusController : ControllerBase
     {
         protected APIResponse _response;
@@ -86,7 +88,7 @@ namespace sshBackend1.Controllers
                     return BadRequest("Invalid Order Status data.");
                 }
 
-                if (await _dbOrderStatus.GetAsync(u => u.OrderStatusName.ToLower() == createDTO.EventName.ToLower()) != null)
+                if (await _dbOrderStatus.GetAsync(u => u.OrderStatusName.ToLower() == createDTO.OrderStatusName.ToLower()) != null)
                 {
                     ModelState.AddModelError("ErrorsMessages", "Order Status already exists!");
                     return BadRequest(ModelState);
@@ -150,14 +152,14 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                if (updateDTO == null || id != updateDTO.EventId)
+                if (updateDTO == null || id != updateDTO.OrderStatusId)
                 {
                     return BadRequest();
                 }
 
                 OrderStatus model = _mapper.Map<OrderStatus>(updateDTO);
 
-                _dbOrderStatus.UpdateOrderStatusAsync(model);
+                await _dbOrderStatus.UpdateOrderStatusAsync(model);
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
                 return Ok(_response);

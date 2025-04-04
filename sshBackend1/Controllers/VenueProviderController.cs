@@ -167,7 +167,7 @@ namespace sshBackend1.Controllers
 
                 VenueProvider model = _mapper.Map<VenueProvider>(updateDTO);
 
-                _dbVenueProvider.UpdateVenueProviderAsync(model);
+                await _dbVenueProvider.UpdateVenueProviderAsync(model);
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
                 return Ok(_response);

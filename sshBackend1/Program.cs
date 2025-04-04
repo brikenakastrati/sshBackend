@@ -13,7 +13,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IEventRepository, EventRepository>(); 
 builder.Services.AddScoped<IFloristRepository, FloristRepository>();
-builder.Services.AddScoped<IVenueProviderRepository, VenueProviderRepository>(); 
+builder.Services.AddScoped<IVenueProviderRepository, VenueProviderRepository>();
+builder.Services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
+
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 
