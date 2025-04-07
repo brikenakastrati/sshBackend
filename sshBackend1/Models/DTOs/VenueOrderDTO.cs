@@ -22,11 +22,6 @@
 
         public int? OrderStatusId { get; set; }
 
-        public virtual Event Event { get; set; }
-
-        public virtual OrderStatus OrderStatus { get; set; }
-
-        public virtual Venue Venue { get; set; }
 
         // Fusha për multi-tenancy
         public string TenantId { get; set; }

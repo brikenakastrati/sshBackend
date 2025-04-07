@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using sshBackend1.Data;
 using sshBackend1.Models;
+using sshBackend1.Models.DTOs;
+using sshBackend1.Repository.IRepository;
 
 namespace sshBackend1.Controllers
 {
@@ -14,95 +19,198 @@ namespace sshBackend1.Controllers
     [ApiController]
     public class VenueOrderController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        protected APIResponse _response;
+        private readonly IVenueOrderRepository _dbVenueOrder;
+        private readonly IMapper _mapper;
 
-        public VenueOrderController(ApplicationDbContext context)
+        public VenueOrderController(IVenueOrderRepository dbVenueOrder, IMapper mapper)
         {
-            _context = context;
+            _dbVenueOrder = dbVenueOrder;
+            _mapper = mapper;
+            _response = new();
         }
 
-        // GET: api/VenueOrder
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<VenueOrder>>> GetVenueOrders()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetEvents()
         {
-            return await _context.VenueOrders.ToListAsync();
+            try
+            {
+                IEnumerable<VenueOrder> venueOrderList = await _dbVenueOrder.GetAllAsync();
+                _response.Result = _mapper.Map<List<VenueOrderDTO>>(venueOrderList);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
         }
 
-        // GET: api/VenueOrder/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<VenueOrder>> GetVenueOrder(int id)
+        [HttpGet("{id:int}", Name = "GetVenueOrder")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> GetVenueOrder(int id)
         {
-            var venueOrder = await _context.VenueOrders.FindAsync(id);
-
-            if (venueOrder == null)
+            try
             {
-                return NotFound();
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var venueOrderEntity = await _dbVenueOrder.GetAsync(u => u.VenueOrderId == id);
+                if (venueOrderEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                _response.Result = _mapper.Map<VenueOrderDTO>(venueOrderEntity);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> CreateEvent([FromBody] VenueOrderDTO createDTO)
+        {
+            try
+            {
+                if (createDTO == null)
+                {
+                    return BadRequest("Invalid Venue Order data.");
+                }
+
+                if (await _dbVenueOrder.GetAsync(u => u.Name.ToLower() == createDTO.Name.ToLower()) != null)
+                {
+                    ModelState.AddModelError("ErrorsMessages", "Venue Order already exists!");
+                    return BadRequest(ModelState);
+                }
+
+                VenueOrder venueOrderEntity = _mapper.Map<VenueOrder>(createDTO);
+                await _dbVenueOrder.CreateAsync(venueOrderEntity);
+
+                _response.Result = _mapper.Map<VenueOrderDTO>(venueOrderEntity);
+                _response.StatusCode = HttpStatusCode.Created;
+                return CreatedAtRoute("GetVenueOrder", new { id = venueOrderEntity.VenueOrderId }, _response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpDelete("{id:int}", Name = "DeleteVenueOrder")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> DeleteVenueOrder(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var venueOrderEntity = await _dbVenueOrder.GetAsync(u => u.VenueOrderId == id);
+                if (venueOrderEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                await _dbVenueOrder.DeleteVenueOrderAsync(venueOrderEntity);
+
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpPut("{id:int}", Name = "UpdateVenueOrder")]
+        public async Task<ActionResult<APIResponse>> UpdateVenueOrder(int id, [FromBody] VenueOrderDTO updateDTO)
+        {
+            try
+            {
+                if (updateDTO == null || id != updateDTO.VenueOrderId)
+                {
+                    return BadRequest();
+                }
+
+                VenueOrder model = _mapper.Map<VenueOrder>(updateDTO);
+
+                await _dbVenueOrder.UpdateVenueOrderAsync(model);
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
 
-            return venueOrder;
         }
 
-        // PUT: api/VenueOrder/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutVenueOrder(int id, VenueOrder venueOrder)
+        [HttpPatch("{id:int}", Name = "UpdatePartialVenueOrder")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdatePartialVenueOrder(int id, JsonPatchDocument<VenueOrderDTO> patchDTO)
         {
-            if (id != venueOrder.VenueOrderId)
+            if (patchDTO == null || id == 0)
             {
                 return BadRequest();
             }
 
-            _context.Entry(venueOrder).State = EntityState.Modified;
+            var venueOrderEntity = await _dbVenueOrder.GetAsync(u => u.VenueOrderId == id, tracked: false);
 
-            try
+            if (venueOrderEntity == null)
             {
-                await _context.SaveChangesAsync();
+                return BadRequest();
             }
-            catch (DbUpdateConcurrencyException)
+
+            VenueOrderDTO venueOrderDTO = _mapper.Map<VenueOrderDTO>(venueOrderEntity);
+            patchDTO.ApplyTo(venueOrderDTO, ModelState);
+
+            if (!ModelState.IsValid)
             {
-                if (!VenueOrderExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ModelState);
             }
+
+            VenueOrder model = _mapper.Map<VenueOrder>(venueOrderDTO);
+            await _dbVenueOrder.UpdateVenueOrderAsync(model);
 
             return NoContent();
         }
 
-        // POST: api/VenueOrder
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<VenueOrder>> PostVenueOrder(VenueOrder venueOrder)
-        {
-            _context.VenueOrders.Add(venueOrder);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetVenueOrder", new { id = venueOrder.VenueOrderId }, venueOrder);
-        }
-
-        // DELETE: api/VenueOrder/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVenueOrder(int id)
-        {
-            var venueOrder = await _context.VenueOrders.FindAsync(id);
-            if (venueOrder == null)
-            {
-                return NotFound();
-            }
-
-            _context.VenueOrders.Remove(venueOrder);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool VenueOrderExists(int id)
-        {
-            return _context.VenueOrders.Any(e => e.VenueOrderId == id);
-        }
     }
 }
