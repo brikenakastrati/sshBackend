@@ -3,17 +3,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace sshBackend1.Models.DTOs
 {
-    public class VenueTypeDTO
+    public class FlowerArrangementType
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
-        public int VenueTypeId { get; set; }
+        public int FlowerArrangementTypeId { get; set; }
 
         public string Name { get; set; }
 
-
-        // Fusha për multi-tenancy
+      
         public string TenantId { get; set; }
     }
 }

@@ -1,7 +1,12 @@
-﻿namespace sshBackend1.Models.DTOs
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace sshBackend1.Models.DTOs
 {
     public class VenueDTO
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+
         public int VenueId { get; set; }
 
         public string Name { get; set; }
