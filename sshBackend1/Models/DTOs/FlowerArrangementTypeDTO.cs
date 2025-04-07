@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace sshBackend1.Models.DTOs
 {
-    public class FlowerArrangementType
+    public class FlowerArrangementTypeDTO
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

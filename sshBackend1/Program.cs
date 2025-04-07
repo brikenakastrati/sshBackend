@@ -18,6 +18,7 @@ builder.Services.AddScoped<IVenueTypeRepository, VenueTypeRepository>();
 builder.Services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
 builder.Services.AddScoped<IVenueRepository, VenueRepository>();
 builder.Services.AddScoped<IVenueOrderRepository, VenueOrderRepository>();
+builder.Services.AddScoped<IFlowerArrangementTypeRepository, FlowerArrangementTypeRepository>();
 
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
