@@ -4,6 +4,7 @@ using sshBackend1.Data;
 using sshBackend1.Repository.IRepository;
 using sshBackend1.Repository;
 using sshBackend1.Services;
+using sshBackend1.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddScoped<IVenueRepository, VenueRepository>();
 builder.Services.AddScoped<IVenueOrderRepository, VenueOrderRepository>();
 builder.Services.AddScoped<IFlowerArrangementTypeRepository, FlowerArrangementTypeRepository>();
 builder.Services.AddScoped<IFlowerArrangementOrderRepository, FlowerArrangementOrderRepository>();
+builder.Services.AddScoped<IFlowerArrangementRepository, FlowerArrangementRepository>();
 
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));

@@ -35,6 +35,9 @@ namespace sshBackend1
 
             CreateMap<FlowerArrangementOrder, FlowerArrangementOrderDTO>();
             CreateMap<FlowerArrangementOrderDTO, FlowerArrangementOrder>();
+
+            CreateMap<FlowerArrangement, FlowerArrangementDTO>();
+            CreateMap<FlowerArrangementDTO, FlowerArrangement>();
         }
     }
 }
