@@ -1,12 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using sshBackend1.Data;
 using sshBackend1.Models;
+using sshBackend1.Models.DTOs;
+using sshBackend1.Repository.IRepository;
+
 
 namespace sshBackend1.Controllers
 {
@@ -14,95 +20,196 @@ namespace sshBackend1.Controllers
     [ApiController]
     public class FlowerArrangementController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        protected APIResponse _response;
+        private readonly IFlowerArrangementRepository _dbFlowerArrangement;
+        private readonly IMapper _mapper;
 
-        public FlowerArrangementController(ApplicationDbContext context)
+        public FlowerArrangementController(IFlowerArrangementRepository dbFlowerArrangement, IMapper mapper)
         {
-            _context = context;
+            _dbFlowerArrangement = dbFlowerArrangement;
+            _mapper = mapper;
+            _response = new();
         }
 
-        // GET: api/FlowerArrangement
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<FlowerArrangement>>> GetFlowerArrangements()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetFlowerArrangements()
         {
-            return await _context.FlowerArrangements.ToListAsync();
+            try
+            {
+                IEnumerable<FlowerArrangement> flowerArrangementList = await _dbFlowerArrangement.GetAllAsync();
+                _response.Result = _mapper.Map<List<FlowerArrangementDTO>>(flowerArrangementList);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
         }
 
-        // GET: api/FlowerArrangement/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<FlowerArrangement>> GetFlowerArrangement(int id)
+        [HttpGet("{id:int}", Name = "GetFlowerArrangement")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> GetFlowerArrangement(int id)
         {
-            var flowerArrangement = await _context.FlowerArrangements.FindAsync(id);
-
-            if (flowerArrangement == null)
+            try
             {
-                return NotFound();
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var flowerArrangementEntity = await _dbFlowerArrangement.GetAsync(u => u.FlowerArrangementId == id);
+                if (flowerArrangementEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                _response.Result = _mapper.Map<FlowerArrangementDTO>(flowerArrangementEntity);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> CreateFlowerArrangement([FromBody] FlowerArrangementDTO createDTO)
+        {
+            try
+            {
+                if (createDTO == null)
+                {
+                    return BadRequest("Invalid Flower Arrangement data.");
+                }
+
+                if (await _dbFlowerArrangement.GetAsync(u => u.Name.ToLower() == createDTO.Name.ToLower()) != null)
+                {
+                    ModelState.AddModelError("ErrorsMessages", "Flower Arrangement already exists!");
+                    return BadRequest(ModelState);
+                }
+
+                FlowerArrangement flowerArrangementEntity = _mapper.Map<FlowerArrangement>(createDTO);
+                await _dbFlowerArrangement.CreateAsync(flowerArrangementEntity);
+
+                _response.Result = _mapper.Map<FlowerArrangementDTO>(flowerArrangementEntity);
+                _response.StatusCode = HttpStatusCode.Created;
+                return CreatedAtRoute("GetFlowerArrangement", new { id = flowerArrangementEntity.FlowerArrangementId }, _response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpDelete("{id:int}", Name = "DeleteFlowerArrangement")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> DeleteFlowerArrangement(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var flowerArrangementEntity = await _dbFlowerArrangement.GetAsync(u => u.FlowerArrangementId == id);
+                if (flowerArrangementEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                await _dbFlowerArrangement.DeleteFlowerArrangementAsync(flowerArrangementEntity);
+
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpPut("{id:int}", Name = "UpdateFlowerArrangement")]
+        public async Task<ActionResult<APIResponse>> UpdateFlowerArrangement(int id, [FromBody] FlowerArrangementDTO updateDTO)
+        {
+            try
+            {
+                if (updateDTO == null || id != updateDTO.FlowerArrangementId)
+                {
+                    return BadRequest();
+                }
+
+                FlowerArrangement model = _mapper.Map<FlowerArrangement>(updateDTO);
+
+                await _dbFlowerArrangement.UpdateFlowerArrangementAsync(model);
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
 
-            return flowerArrangement;
         }
 
-        // PUT: api/FlowerArrangement/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutFlowerArrangement(int id, FlowerArrangement flowerArrangement)
+        [HttpPatch("{id:int}", Name = "UpdatePartialFlowerArrangement")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdatePartialFlowerArrangement(int id, JsonPatchDocument<FlowerArrangementDTO> patchDTO)
         {
-            if (id != flowerArrangement.FlowerArrangementId)
+            if (patchDTO == null || id == 0)
             {
                 return BadRequest();
             }
 
-            _context.Entry(flowerArrangement).State = EntityState.Modified;
+            var flowerArrangementEntity = await _dbFlowerArrangement.GetAsync(u => u.FlowerArrangementId == id, tracked: false);
 
-            try
+            if (flowerArrangementEntity == null)
             {
-                await _context.SaveChangesAsync();
+                return BadRequest();
             }
-            catch (DbUpdateConcurrencyException)
+
+            FlowerArrangementDTO flowerArrangementDTO = _mapper.Map<FlowerArrangementDTO>(flowerArrangementEntity);
+            patchDTO.ApplyTo(flowerArrangementDTO, ModelState);
+
+            if (!ModelState.IsValid)
             {
-                if (!FlowerArrangementExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ModelState);
             }
+
+            FlowerArrangement model = _mapper.Map<FlowerArrangement>(flowerArrangementDTO);
+            await _dbFlowerArrangement.UpdateFlowerArrangementAsync(model);
 
             return NoContent();
-        }
-
-        // POST: api/FlowerArrangement
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<FlowerArrangement>> PostFlowerArrangement(FlowerArrangement flowerArrangement)
-        {
-            _context.FlowerArrangements.Add(flowerArrangement);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetFlowerArrangement", new { id = flowerArrangement.FlowerArrangementId }, flowerArrangement);
-        }
-
-        // DELETE: api/FlowerArrangement/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFlowerArrangement(int id)
-        {
-            var flowerArrangement = await _context.FlowerArrangements.FindAsync(id);
-            if (flowerArrangement == null)
-            {
-                return NotFound();
-            }
-
-            _context.FlowerArrangements.Remove(flowerArrangement);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool FlowerArrangementExists(int id)
-        {
-            return _context.FlowerArrangements.Any(e => e.FlowerArrangementId == id);
         }
     }
 }
