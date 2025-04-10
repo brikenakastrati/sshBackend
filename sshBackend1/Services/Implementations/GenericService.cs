@@ -1,23 +1,27 @@
 ﻿using sshBackend1.Data;
 using sshBackend1.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using sshBackend1.Context;
 
 namespace sshBackend1.Services.Implementations
 {
-    public class GenericService<T> : IGenericService<T> where T : class
+    public class GenericService<T> : IGenericService<T> where T : class, ITenantEntity
     {
         private readonly ApplicationDbContext _context;
-        private readonly ITenantService _tenantService;
+        private readonly IContextProvider _contextProvider;
 
-        public GenericService(ApplicationDbContext context, ITenantService tenantService)
+        public GenericService(ApplicationDbContext context, IContextProvider contextProvider)
         {
             _context = context;
-            _tenantService = tenantService;
+            _contextProvider = contextProvider;
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _context.Set<T>().ToListAsync();
+            var tenantId = _contextProvider.GetCurrentTenantId();
+            return await _context.Set<T>()
+                .Where(x => x.TenantId == tenantId)
+                .ToListAsync();
         }
 
         public async Task<T?> GetByIdAsync(int id)
@@ -27,9 +31,10 @@ namespace sshBackend1.Services.Implementations
 
         public async Task<T> CreateAsync(T entity)
         {
+            // Ensure entity implements ITenantEntity and set the TenantId
             if (entity is ITenantEntity tenantEntity)
             {
-                tenantEntity.TenantId = _tenantService.GetTenantId();
+                tenantEntity.TenantId = _contextProvider.GetCurrentTenantId();
             }
             _context.Set<T>().Add(entity);
             await _context.SaveChangesAsync();
@@ -53,5 +58,4 @@ namespace sshBackend1.Services.Implementations
             return true;
         }
     }
-
 }

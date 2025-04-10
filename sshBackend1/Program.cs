@@ -5,6 +5,9 @@ using sshBackend1.Repository.IRepository;
 using sshBackend1.Repository;
 using sshBackend1.Services;
 using sshBackend1.Models;
+using sshBackend1.Context;
+using sshBackend1.Middleware;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +25,9 @@ builder.Services.AddScoped<IVenueOrderRepository, VenueOrderRepository>();
 builder.Services.AddScoped<IFlowerArrangementTypeRepository, FlowerArrangementTypeRepository>();
 builder.Services.AddScoped<IFlowerArrangementOrderRepository, FlowerArrangementOrderRepository>();
 builder.Services.AddScoped<IFlowerArrangementRepository, FlowerArrangementRepository>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
 
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
@@ -41,7 +47,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+//  Vendos Middleware-in e Tenant-it para autorizimit
+app.UseMiddleware<TenantMiddleware>();
+
+
 app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
