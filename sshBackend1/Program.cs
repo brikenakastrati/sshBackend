@@ -26,6 +26,7 @@ builder.Services.AddScoped<IFlowerArrangementTypeRepository, FlowerArrangementTy
 builder.Services.AddScoped<IFlowerArrangementOrderRepository, FlowerArrangementOrderRepository>();
 builder.Services.AddScoped<IFlowerArrangementRepository, FlowerArrangementRepository>();
 builder.Services.AddScoped<IRestaurantStatusRepository, RestaurantStatusRepository>();
+builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
