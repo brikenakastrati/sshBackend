@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace sshBackend1.Models
 {
-    public partial class Restaurant
+    public class Restaurant
     {
         public int RestaurantId { get; set; } // Unique identifier for the restaurant
         public string RestaurantName { get; set; } // Name of the restaurant
