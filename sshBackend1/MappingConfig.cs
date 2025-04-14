@@ -44,6 +44,9 @@ namespace sshBackend1
 
             CreateMap<Restaurant, RestaurantDTO>();
             CreateMap<RestaurantDTO, Restaurant>();
+
+            CreateMap<Table, TableDTO>();
+            CreateMap<TableDTO, Table>();
         }
     }
 }
