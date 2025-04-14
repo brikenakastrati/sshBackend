@@ -47,6 +47,9 @@ namespace sshBackend1
 
             CreateMap<Table, TableDTO>();
             CreateMap<TableDTO, Table>();
+
+            CreateMap<PerformerType,PerformerTypeDTO>();
+            CreateMap<PerformerTypeDTO, PerformerType>();
         }
     }
 }
