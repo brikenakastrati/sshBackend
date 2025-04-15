@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using sshBackend1.Data;
 using sshBackend1.Models;
+using sshBackend1.Models.DTOs;
+using sshBackend1.Repository.IRepository;
 
 namespace sshBackend1.Controllers
 {
@@ -14,95 +19,196 @@ namespace sshBackend1.Controllers
     [ApiController]
     public class MenuOrderController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        protected APIResponse _response;
+        private readonly IMenuOrderRepository _dbMenuOrder;
+        private readonly IMapper _mapper;
 
-        public MenuOrderController(ApplicationDbContext context)
+        public MenuOrderController(IMenuOrderRepository dbMenuOrder, IMapper mapper)
         {
-            _context = context;
+            _dbMenuOrder = dbMenuOrder;
+            _mapper = mapper;
+            _response = new();
         }
 
-        // GET: api/MenuOrder
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MenuOrder>>> GetMenuOrders()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetMenuOrders()
         {
-            return await _context.MenuOrders.ToListAsync();
+            try
+            {
+                IEnumerable<MenuOrder> menuOrderList = await _dbMenuOrder.GetAllAsync();
+                _response.Result = _mapper.Map<List<MenuOrderDTO>>(menuOrderList);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
         }
 
-        // GET: api/MenuOrder/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<MenuOrder>> GetMenuOrder(int id)
+        [HttpGet("{id:int}", Name = "GetMenuOrder")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> GetMenuOrder(int id)
         {
-            var menuOrder = await _context.MenuOrders.FindAsync(id);
-
-            if (menuOrder == null)
+            try
             {
-                return NotFound();
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var menuOrderEntity = await _dbMenuOrder.GetAsync(u => u.MenuOrderId == id);
+                if (menuOrderEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                _response.Result = _mapper.Map<MenuOrderDTO>(menuOrderEntity);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> CreateMenuOrder([FromBody] MenuOrderDTO createDTO)
+        {
+            try
+            {
+                if (createDTO == null)
+                {
+                    return BadRequest("Invalid Menu Order data.");
+                }
+
+                if (await _dbMenuOrder.GetAsync(u => u.OrderName.ToLower() == createDTO.OrderName.ToLower()) != null)
+                {
+                    ModelState.AddModelError("ErrorsMessages", "Menu Order already exists!");
+                    return BadRequest(ModelState);
+                }
+
+                MenuOrder menuOrderEntity = _mapper.Map<MenuOrder>(createDTO);
+                await _dbMenuOrder.CreateAsync(menuOrderEntity);
+
+                _response.Result = _mapper.Map<MenuOrderDTO>(menuOrderEntity);
+                _response.StatusCode = HttpStatusCode.Created;
+                return CreatedAtRoute("GetMenuOrder", new { id = menuOrderEntity.MenuOrderId }, _response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpDelete("{id:int}", Name = "DeleteMenuOrder")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> DeleteMenuOrder(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var menuOrderEntity = await _dbMenuOrder.GetAsync(u => u.MenuOrderId == id);
+                if (menuOrderEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                await _dbMenuOrder.DeleteMenuOrderAsync(menuOrderEntity);
+
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpPut("{id:int}", Name = "UpdateMenuOrder")]
+        public async Task<ActionResult<APIResponse>> UpdateMenuOrder(int id, [FromBody] MenuOrderDTO updateDTO)
+        {
+            try
+            {
+                if (updateDTO == null || id != updateDTO.MenuOrderId)
+                {
+                    return BadRequest();
+                }
+
+                MenuOrder model = _mapper.Map<MenuOrder>(updateDTO);
+
+                await _dbMenuOrder.UpdateMenuOrderAsync(model);
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
 
-            return menuOrder;
         }
 
-        // PUT: api/MenuOrder/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutMenuOrder(int id, MenuOrder menuOrder)
+        [HttpPatch("{id:int}", Name = "UpdatePartialMenuOrder")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdatePartialMenuOrder(int id, JsonPatchDocument<MenuOrderDTO> patchDTO)
         {
-            if (id != menuOrder.MenuOrderId)
+            if (patchDTO == null || id == 0)
             {
                 return BadRequest();
             }
 
-            _context.Entry(menuOrder).State = EntityState.Modified;
+            var menuOrderEntity = await _dbMenuOrder.GetAsync(u => u.MenuOrderId == id, tracked: false);
 
-            try
+            if (menuOrderEntity == null)
             {
-                await _context.SaveChangesAsync();
+                return BadRequest();
             }
-            catch (DbUpdateConcurrencyException)
+
+            MenuOrderDTO menuOrderDTO = _mapper.Map<MenuOrderDTO>(menuOrderEntity);
+            patchDTO.ApplyTo(menuOrderDTO, ModelState);
+
+            if (!ModelState.IsValid)
             {
-                if (!MenuOrderExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ModelState);
             }
+
+            MenuOrder model = _mapper.Map<MenuOrder>(menuOrderDTO);
+            await _dbMenuOrder.UpdateMenuOrderAsync(model);
 
             return NoContent();
-        }
-
-        // POST: api/MenuOrder
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<MenuOrder>> PostMenuOrder(MenuOrder menuOrder)
-        {
-            _context.MenuOrders.Add(menuOrder);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetMenuOrder", new { id = menuOrder.MenuOrderId }, menuOrder);
-        }
-
-        // DELETE: api/MenuOrder/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMenuOrder(int id)
-        {
-            var menuOrder = await _context.MenuOrders.FindAsync(id);
-            if (menuOrder == null)
-            {
-                return NotFound();
-            }
-
-            _context.MenuOrders.Remove(menuOrder);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool MenuOrderExists(int id)
-        {
-            return _context.MenuOrders.Any(e => e.MenuOrderId == id);
         }
     }
 }
