@@ -30,6 +30,7 @@ builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
 builder.Services.AddScoped<ITableRepository, TableRepository>();
 builder.Services.AddScoped<IPerformerTypeRepository, PerformerTypeRepository>();
 builder.Services.AddScoped<IMusicProviderRepository, MusicProviderRepository>();
+builder.Services.AddScoped<IMusicProviderOrderRepository, MusicProviderOrderRepository>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
