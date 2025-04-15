@@ -57,6 +57,9 @@ namespace sshBackend1
             CreateMap<MusicProviderOrder, MusicProviderOrderDTO>();
             CreateMap<MusicProviderOrderDTO, MusicProviderOrder>();
 
+            CreateMap<MenuTypeDTO,MenuType>();
+            CreateMap<MenuType, MenuTypeDTO>();
+
 
         }
     }

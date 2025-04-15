@@ -31,6 +31,7 @@ builder.Services.AddScoped<ITableRepository, TableRepository>();
 builder.Services.AddScoped<IPerformerTypeRepository, PerformerTypeRepository>();
 builder.Services.AddScoped<IMusicProviderRepository, MusicProviderRepository>();
 builder.Services.AddScoped<IMusicProviderOrderRepository, MusicProviderOrderRepository>();
+builder.Services.AddScoped<IMenuTypeRepository, MenuTypeRepository>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
