@@ -50,6 +50,9 @@ namespace sshBackend1
 
             CreateMap<PerformerType,PerformerTypeDTO>();
             CreateMap<PerformerTypeDTO, PerformerType>();
+
+            CreateMap<MusicProvider, MusicProviderDTO>();
+            CreateMap<MusicProviderDTO, MusicProvider>();
         }
     }
 }
