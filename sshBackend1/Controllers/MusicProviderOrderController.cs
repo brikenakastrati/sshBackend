@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using sshBackend1.Data;
 using sshBackend1.Models;
+using sshBackend1.Models.DTOs;
+using sshBackend1.Repository.IRepository;
 
 namespace sshBackend1.Controllers
 {
@@ -14,95 +19,196 @@ namespace sshBackend1.Controllers
     [ApiController]
     public class MusicProviderOrderController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        protected APIResponse _response;
+        private readonly IMusicProviderOrderRepository _dbMusicProviderOrder;
+        private readonly IMapper _mapper;
 
-        public MusicProviderOrderController(ApplicationDbContext context)
+        public MusicProviderOrderController(IMusicProviderOrderRepository dbMusicProviderOrder, IMapper mapper)
         {
-            _context = context;
+            _dbMusicProviderOrder = dbMusicProviderOrder;
+            _mapper = mapper;
+            _response = new();
         }
 
-        // GET: api/MusicProviderOrder
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MusicProviderOrder>>> GetMusicProviderOrders()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetMusicProviderOrders()
         {
-            return await _context.MusicProviderOrders.ToListAsync();
+            try
+            {
+                IEnumerable<MusicProviderOrder> musicProviderOrderList = await _dbMusicProviderOrder.GetAllAsync();
+                _response.Result = _mapper.Map<List<MusicProviderOrderDTO>>(musicProviderOrderList);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
         }
 
-        // GET: api/MusicProviderOrder/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<MusicProviderOrder>> GetMusicProviderOrder(int id)
+        [HttpGet("{id:int}", Name = "GetMusicProviderOrder")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> GetMusicProviderOrder(int id)
         {
-            var musicProviderOrder = await _context.MusicProviderOrders.FindAsync(id);
-
-            if (musicProviderOrder == null)
+            try
             {
-                return NotFound();
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var musicProviderOrderEntity = await _dbMusicProviderOrder.GetAsync(u => u.MusicProviderOrderId == id);
+                if (musicProviderOrderEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                _response.Result = _mapper.Map<MusicProviderOrderDTO>(musicProviderOrderEntity);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> CreateMusicProviderOrder([FromBody] MusicProviderOrderDTO createDTO)
+        {
+            try
+            {
+                if (createDTO == null)
+                {
+                    return BadRequest("Invalid Music Provider Order data.");
+                }
+
+                if (await _dbMusicProviderOrder.GetAsync(u => u.OrderName.ToLower() == createDTO.OrderName.ToLower()) != null)
+                {
+                    ModelState.AddModelError("ErrorsMessages", "Music Provider Order already exists!");
+                    return BadRequest(ModelState);
+                }
+
+                MusicProviderOrder musicProviderOrderEntity = _mapper.Map<MusicProviderOrder>(createDTO);
+                await _dbMusicProviderOrder.CreateAsync(musicProviderOrderEntity);
+
+                _response.Result = _mapper.Map<MusicProviderOrderDTO>(musicProviderOrderEntity);
+                _response.StatusCode = HttpStatusCode.Created;
+                return CreatedAtRoute("GetMusicProviderOrder", new { id = musicProviderOrderEntity.MusicProviderOrderId }, _response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpDelete("{id:int}", Name = "DeleteMusicProviderOrder")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> DeleteMusicProviderOrder(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var musicProviderOrderEntity = await _dbMusicProviderOrder.GetAsync(u => u.MusicProviderOrderId == id);
+                if (musicProviderOrderEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                await _dbMusicProviderOrder.DeleteMusicProviderOrderAsync(musicProviderOrderEntity);
+
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpPut("{id:int}", Name = "UpdateMusicProviderOrder")]
+        public async Task<ActionResult<APIResponse>> UpdateMusicProviderOrder(int id, [FromBody] MusicProviderOrderDTO updateDTO)
+        {
+            try
+            {
+                if (updateDTO == null || id != updateDTO.MusicProviderOrderId)
+                {
+                    return BadRequest();
+                }
+
+                MusicProviderOrder model = _mapper.Map<MusicProviderOrder>(updateDTO);
+
+                await _dbMusicProviderOrder.UpdateMusicProviderOrderAsync(model);
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
 
-            return musicProviderOrder;
         }
 
-        // PUT: api/MusicProviderOrder/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutMusicProviderOrder(int id, MusicProviderOrder musicProviderOrder)
+        [HttpPatch("{id:int}", Name = "UpdatePartialMusicProviderOrder")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdatePartialMusicProviderOrder(int id, JsonPatchDocument<MusicProviderOrderDTO> patchDTO)
         {
-            if (id != musicProviderOrder.MusicProviderOrderId)
+            if (patchDTO == null || id == 0)
             {
                 return BadRequest();
             }
 
-            _context.Entry(musicProviderOrder).State = EntityState.Modified;
+            var musicProviderOrderEntity = await _dbMusicProviderOrder.GetAsync(u => u.MusicProviderOrderId == id, tracked: false);
 
-            try
+            if (musicProviderOrderEntity == null)
             {
-                await _context.SaveChangesAsync();
+                return BadRequest();
             }
-            catch (DbUpdateConcurrencyException)
+
+            MusicProviderOrderDTO musicProviderOrderDTO = _mapper.Map<MusicProviderOrderDTO>(musicProviderOrderEntity);
+            patchDTO.ApplyTo(musicProviderOrderDTO, ModelState);
+
+            if (!ModelState.IsValid)
             {
-                if (!MusicProviderOrderExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ModelState);
             }
+
+            MusicProviderOrder model = _mapper.Map<MusicProviderOrder>(musicProviderOrderDTO);
+            await _dbMusicProviderOrder.UpdateMusicProviderOrderAsync(model);
 
             return NoContent();
-        }
-
-        // POST: api/MusicProviderOrder
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<MusicProviderOrder>> PostMusicProviderOrder(MusicProviderOrder musicProviderOrder)
-        {
-            _context.MusicProviderOrders.Add(musicProviderOrder);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetMusicProviderOrder", new { id = musicProviderOrder.MusicProviderOrderId }, musicProviderOrder);
-        }
-
-        // DELETE: api/MusicProviderOrder/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMusicProviderOrder(int id)
-        {
-            var musicProviderOrder = await _context.MusicProviderOrders.FindAsync(id);
-            if (musicProviderOrder == null)
-            {
-                return NotFound();
-            }
-
-            _context.MusicProviderOrders.Remove(musicProviderOrder);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool MusicProviderOrderExists(int id)
-        {
-            return _context.MusicProviderOrders.Any(e => e.MusicProviderOrderId == id);
         }
     }
 }
