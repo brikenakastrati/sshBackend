@@ -12,8 +12,8 @@ using sshBackend1.Data;
 namespace sshBackend1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250328101728_FixDecimalPrecision")]
-    partial class FixDecimalPrecision
+    [Migration("20250415125834_Inital")]
+    partial class Inital
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -792,6 +792,8 @@ namespace sshBackend1.Migrations
 
                     b.HasKey("TableId");
 
+                    b.HasIndex("EventId");
+
                     b.HasIndex("VenueId");
 
                     b.ToTable("Tables");
@@ -861,7 +863,7 @@ namespace sshBackend1.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TableStatuses");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("sshBackend1.Models.Venue", b =>
@@ -998,7 +1000,7 @@ namespace sshBackend1.Migrations
 
                     b.HasIndex("PartnerStatusId");
 
-                    b.ToTable("Events");
+                    b.ToTable("VenueProviders");
                 });
 
             modelBuilder.Entity("sshBackend1.Models.VenueType", b =>
@@ -1076,7 +1078,7 @@ namespace sshBackend1.Migrations
                         .HasForeignKey("GuestStatusId");
 
                     b.HasOne("sshBackend1.Models.Table", "Table")
-                        .WithMany()
+                        .WithMany("Guests")
                         .HasForeignKey("TableId");
 
                     b.Navigation("Event");
@@ -1213,9 +1215,15 @@ namespace sshBackend1.Migrations
 
             modelBuilder.Entity("sshBackend1.Models.Table", b =>
                 {
+                    b.HasOne("sshBackend1.Models.Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId");
+
                     b.HasOne("sshBackend1.Models.Venue", null)
                         .WithMany("Tables")
                         .HasForeignKey("VenueId");
+
+                    b.Navigation("Event");
                 });
 
             modelBuilder.Entity("sshBackend1.Models.Venue", b =>
@@ -1259,7 +1267,7 @@ namespace sshBackend1.Migrations
             modelBuilder.Entity("sshBackend1.Models.VenueProvider", b =>
                 {
                     b.HasOne("sshBackend1.Models.PartnerStatus", "PartnerStatus")
-                        .WithMany("Events")
+                        .WithMany("VenueProviders")
                         .HasForeignKey("PartnerStatusId");
 
                     b.Navigation("PartnerStatus");
@@ -1326,7 +1334,7 @@ namespace sshBackend1.Migrations
 
                     b.Navigation("PastryShops");
 
-                    b.Navigation("Events");
+                    b.Navigation("VenueProviders");
                 });
 
             modelBuilder.Entity("sshBackend1.Models.PastryShop", b =>
@@ -1347,6 +1355,11 @@ namespace sshBackend1.Migrations
             modelBuilder.Entity("sshBackend1.Models.Restaurant", b =>
                 {
                     b.Navigation("Menu");
+                });
+
+            modelBuilder.Entity("sshBackend1.Models.Table", b =>
+                {
+                    b.Navigation("Guests");
                 });
 
             modelBuilder.Entity("sshBackend1.Models.Venue", b =>
