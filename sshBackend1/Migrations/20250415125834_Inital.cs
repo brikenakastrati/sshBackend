@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace sshBackend1.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Inital : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,9 @@ namespace sshBackend1.Migrations
                     EventId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EventName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EventTypeId = table.Column<int>(type: "int", nullable: true)
+                    EventTypeId = table.Column<int>(type: "int", nullable: true),
+                    EventDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -31,7 +33,8 @@ namespace sshBackend1.Migrations
                 {
                     FlowerArrangementTypeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -44,7 +47,8 @@ namespace sshBackend1.Migrations
                 {
                     GuestStatusId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    GuestStatusName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    GuestStatusName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,7 +61,8 @@ namespace sshBackend1.Migrations
                 {
                     MenuTypeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    TypeName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TypeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -70,7 +75,8 @@ namespace sshBackend1.Migrations
                 {
                     OrderStatusId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderStatusName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    OrderStatusName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -83,7 +89,8 @@ namespace sshBackend1.Migrations
                 {
                     PartnerStatusId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -96,7 +103,8 @@ namespace sshBackend1.Migrations
                 {
                     PastryTypeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    TypeName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TypeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -109,7 +117,8 @@ namespace sshBackend1.Migrations
                 {
                     PerformerTypeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -124,7 +133,8 @@ namespace sshBackend1.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -132,13 +142,14 @@ namespace sshBackend1.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TableStatuses",
+                name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ProfilePictureUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -156,7 +167,7 @@ namespace sshBackend1.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TableStatuses", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -165,7 +176,8 @@ namespace sshBackend1.Migrations
                 {
                     VenueTypeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -184,7 +196,8 @@ namespace sshBackend1.Migrations
                     OrderDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventId = table.Column<int>(type: "int", nullable: true),
-                    OrderStatusId = table.Column<int>(type: "int", nullable: true)
+                    OrderStatusId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -214,7 +227,8 @@ namespace sshBackend1.Migrations
                     IngreedientsForbiddenByReligion = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AdditionalRequests = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventId = table.Column<int>(type: "int", nullable: true),
-                    OrderStatusId = table.Column<int>(type: "int", nullable: true)
+                    OrderStatusId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -245,7 +259,8 @@ namespace sshBackend1.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventId = table.Column<int>(type: "int", nullable: true),
-                    OrderStatusId = table.Column<int>(type: "int", nullable: true)
+                    OrderStatusId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -274,7 +289,8 @@ namespace sshBackend1.Migrations
                     OrderDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventId = table.Column<int>(type: "int", nullable: true),
-                    OrderStatusId = table.Column<int>(type: "int", nullable: true)
+                    OrderStatusId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -302,7 +318,8 @@ namespace sshBackend1.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AgencyFee = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    PartnerStatusId = table.Column<int>(type: "int", nullable: true)
+                    PartnerStatusId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -323,7 +340,8 @@ namespace sshBackend1.Migrations
                     ShopName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PartnerStatusId = table.Column<int>(type: "int", nullable: true)
+                    PartnerStatusId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -336,7 +354,7 @@ namespace sshBackend1.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Events",
+                name: "VenueProviders",
                 columns: table => new
                 {
                     VenueProviderId = table.Column<int>(type: "int", nullable: false)
@@ -346,7 +364,8 @@ namespace sshBackend1.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AgencyFee = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    PartnerStatusId = table.Column<int>(type: "int", nullable: true)
+                    PartnerStatusId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -371,7 +390,8 @@ namespace sshBackend1.Migrations
                     AgencyFee = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     PerformerTypeId = table.Column<int>(type: "int", nullable: true),
                     PartnerStatusId = table.Column<int>(type: "int", nullable: true),
-                    BaseHourlyRate = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
+                    BaseHourlyRate = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -398,7 +418,8 @@ namespace sshBackend1.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     FloristId = table.Column<int>(type: "int", nullable: false),
-                    FlowerArrangementTypeId = table.Column<int>(type: "int", nullable: false)
+                    FlowerArrangementTypeId = table.Column<int>(type: "int", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -426,7 +447,8 @@ namespace sshBackend1.Migrations
                     PastryName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ShopId = table.Column<int>(type: "int", nullable: true),
-                    PastryTypeId = table.Column<int>(type: "int", nullable: true)
+                    PastryTypeId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -454,7 +476,8 @@ namespace sshBackend1.Migrations
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     VenueProviderId = table.Column<int>(type: "int", nullable: true),
-                    VenueTypeId = table.Column<int>(type: "int", nullable: true)
+                    VenueTypeId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -462,7 +485,7 @@ namespace sshBackend1.Migrations
                     table.ForeignKey(
                         name: "FK_Venues_VenueProviders_VenueProviderId",
                         column: x => x.VenueProviderId,
-                        principalTable: "Events",
+                        principalTable: "VenueProviders",
                         principalColumn: "VenueProviderId");
                     table.ForeignKey(
                         name: "FK_Venues_VenueTypes_VenueTypeId",
@@ -480,7 +503,8 @@ namespace sshBackend1.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     GenreId = table.Column<int>(type: "int", nullable: false),
                     MusicProviderId = table.Column<int>(type: "int", nullable: false),
-                    Length = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Length = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -503,6 +527,7 @@ namespace sshBackend1.Migrations
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RestaurantStatusId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     VenueId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -530,11 +555,17 @@ namespace sshBackend1.Migrations
                     NumberOfSeats = table.Column<int>(type: "int", nullable: false),
                     TableStatusId = table.Column<int>(type: "int", nullable: true),
                     EventId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     VenueId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tables", x => x.TableId);
+                    table.ForeignKey(
+                        name: "FK_Tables_Events_EventId",
+                        column: x => x.EventId,
+                        principalTable: "Events",
+                        principalColumn: "EventId");
                     table.ForeignKey(
                         name: "FK_Tables_Venues_VenueId",
                         column: x => x.VenueId,
@@ -556,7 +587,8 @@ namespace sshBackend1.Migrations
                     AgencyFee = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventId = table.Column<int>(type: "int", nullable: true),
-                    OrderStatusId = table.Column<int>(type: "int", nullable: true)
+                    OrderStatusId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -589,6 +621,7 @@ namespace sshBackend1.Migrations
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CateringId = table.Column<int>(type: "int", nullable: true),
                     MenuTypeId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RestaurantId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -617,7 +650,8 @@ namespace sshBackend1.Migrations
                     GuestSurname = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     GuestStatusId = table.Column<int>(type: "int", nullable: true),
                     EventId = table.Column<int>(type: "int", nullable: true),
-                    TableId = table.Column<int>(type: "int", nullable: true)
+                    TableId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -760,6 +794,11 @@ namespace sshBackend1.Migrations
                 column: "VenueId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Tables_EventId",
+                table: "Tables",
+                column: "EventId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tables_VenueId",
                 table: "Tables",
                 column: "VenueId");
@@ -781,7 +820,7 @@ namespace sshBackend1.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_VenueProviders_PartnerStatusId",
-                table: "Events",
+                table: "VenueProviders",
                 column: "PartnerStatusId");
 
             migrationBuilder.CreateIndex(
@@ -826,7 +865,7 @@ namespace sshBackend1.Migrations
                 name: "PlaylistItems");
 
             migrationBuilder.DropTable(
-                name: "TableStatuses");
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "VenueOrders");
@@ -859,10 +898,10 @@ namespace sshBackend1.Migrations
                 name: "MusicProviders");
 
             migrationBuilder.DropTable(
-                name: "Events");
+                name: "OrderStatuses");
 
             migrationBuilder.DropTable(
-                name: "OrderStatuses");
+                name: "Events");
 
             migrationBuilder.DropTable(
                 name: "RestaurantStatuses");
@@ -874,7 +913,7 @@ namespace sshBackend1.Migrations
                 name: "PerformerTypes");
 
             migrationBuilder.DropTable(
-                name: "Events");
+                name: "VenueProviders");
 
             migrationBuilder.DropTable(
                 name: "VenueTypes");
