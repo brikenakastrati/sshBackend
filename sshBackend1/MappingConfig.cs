@@ -66,6 +66,8 @@ namespace sshBackend1
             CreateMap<Menu, MenuDTO>();
             CreateMap<MenuDTO, Menu>();
 
+            CreateMap<PlaylistItem, PlaylistItemDTO>();
+            CreateMap<PlaylistItemDTO, PlaylistItem>();
         }
     }
 }
