@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace sshBackend1.Repository.IRepository
 {
-    public interface IPartnerStatusRepository
+    public interface IPartnerStatusRepository :IRepository<PartnerStatus>
     {
         Task<IEnumerable<PartnerStatus>> GetAllPartnerStatusesAsync(Expression<Func<PartnerStatus, bool>> filter = null);
         Task<PartnerStatus> GetPartnerStatusAsync(Expression<Func<PartnerStatus, bool>> filter = null);
