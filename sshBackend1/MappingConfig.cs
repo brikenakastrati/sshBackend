@@ -86,6 +86,9 @@ namespace sshBackend1
 
             CreateMap<Guest,GuestDTO>();
             CreateMap<GuestDTO, Guest>();
+
+            CreateMap<Users, UsersDTO>();
+            CreateMap<UsersDTO, Users>();
         }
     }
 }
