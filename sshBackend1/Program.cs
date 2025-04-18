@@ -38,6 +38,7 @@ builder.Services.AddScoped<IPlaylistItemRepository, PlaylistItemRepository>();
 builder.Services.AddScoped<IPartnerStatusRepository, PartnerStatusRepository>();
 builder.Services.AddScoped<IPastryShopRepository, PastryShopRepository>();
 builder.Services.AddScoped<IPastryRepository, PastryRepository>();
+builder.Services.AddScoped<IPastryOrderRepository, PastryOrderRepository>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
