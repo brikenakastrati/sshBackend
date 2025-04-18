@@ -36,6 +36,7 @@ builder.Services.AddScoped<IMenuOrderRepository, MenuOrderRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<IPlaylistItemRepository, PlaylistItemRepository>();
 builder.Services.AddScoped<IPartnerStatusRepository, PartnerStatusRepository>();
+builder.Services.AddScoped<IPastryShopRepository, PastryShopRepository>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
