@@ -74,6 +74,9 @@ namespace sshBackend1
 
             CreateMap<PastryShop, PastryShopDTO>();
             CreateMap<PastryShopDTO, PastryShop>();
+
+            CreateMap<Pastry,PastryDTO>();
+            CreateMap<PastryDTO, Pastry>();
         }
     }
 }
