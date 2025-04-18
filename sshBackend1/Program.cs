@@ -34,6 +34,7 @@ builder.Services.AddScoped<IMusicProviderOrderRepository, MusicProviderOrderRepo
 builder.Services.AddScoped<IMenuTypeRepository, MenuTypeRepository>();
 builder.Services.AddScoped<IMenuOrderRepository, MenuOrderRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+builder.Services.AddScoped<IPlaylistItemRepository, PlaylistItemRepository>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
