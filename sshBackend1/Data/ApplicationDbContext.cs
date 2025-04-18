@@ -35,6 +35,7 @@ namespace sshBackend1.Data
         public DbSet<Pastry> Pastries { get; set; }
         public DbSet<PastryShop> PastryShops { get; set; }
         public DbSet<PastryOrder> PastryOrders { get; set; }
+        public DbSet<PastryType> PastryTypes { get; set; }
         public DbSet<PerformerType> PerformerTypes { get; set; }
         public DbSet<PlaylistItem> PlaylistItems { get; set; }
         public DbSet<Restaurant> Restaurants{ get; set; }
