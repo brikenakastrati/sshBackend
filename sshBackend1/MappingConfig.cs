@@ -80,6 +80,9 @@ namespace sshBackend1
 
             CreateMap<PastryOrder, PastryOrderDTO>();
             CreateMap<PastryOrderDTO, PastryOrder>();
+
+            CreateMap<PastryType, PastryTypeDTO>();
+            CreateMap<PastryTypeDTO, PastryType>();
         }
     }
 }
