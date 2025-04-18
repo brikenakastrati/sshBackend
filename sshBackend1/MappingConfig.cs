@@ -83,6 +83,9 @@ namespace sshBackend1
 
             CreateMap<PastryType, PastryTypeDTO>();
             CreateMap<PastryTypeDTO, PastryType>();
+
+            CreateMap<Guest,GuestDTO>();
+            CreateMap<GuestDTO, Guest>();
         }
     }
 }
