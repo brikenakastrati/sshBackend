@@ -1,12 +1,13 @@
+using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using sshBackend1.Models;
+using sshBackend1.Models.DTOs;
+using sshBackend1.Repository.IRepository;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using sshBackend1.Data;
-using sshBackend1.Models;
 
 namespace sshBackend1.Controllers
 {
@@ -14,95 +15,195 @@ namespace sshBackend1.Controllers
     [ApiController]
     public class PastryOrderController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        protected APIResponse _response;
+        private readonly IPastryOrderRepository _dbPastryOrder;
+        private readonly IMapper _mapper;
 
-        public PastryOrderController(ApplicationDbContext context)
+        public PastryOrderController(IPastryOrderRepository dbPastryOrder, IMapper mapper)
         {
-            _context = context;
+            _dbPastryOrder = dbPastryOrder;
+            _mapper = mapper;
+            _response = new();
         }
 
-        // GET: api/PastryOrder
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PastryOrder>>> GetPastryOrders()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetPastryOrders()
         {
-            return await _context.PastryOrders.ToListAsync();
+            try
+            {
+                IEnumerable<PastryOrder> pastryOrderList = await _dbPastryOrder.GetAllAsync();
+                _response.Result = _mapper.Map<List<PastryOrderDTO>>(pastryOrderList);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
         }
 
-        // GET: api/PastryOrder/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<PastryOrder>> GetPastryOrder(int id)
+        [HttpGet("{id:int}", Name = "GetPastryOrder")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> GetPastryOrder(int id)
         {
-            var pastryOrder = await _context.PastryOrders.FindAsync(id);
-
-            if (pastryOrder == null)
+            try
             {
-                return NotFound();
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var pastryOrderEntity = await _dbPastryOrder.GetAsync(u => u.PastryOrderId == id);
+                if (pastryOrderEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                _response.Result = _mapper.Map<PastryOrderDTO>(pastryOrderEntity);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> CreatePastryOrder([FromBody] PastryOrderDTO createDTO)
+        {
+            try
+            {
+                if (createDTO == null)
+                {
+                    return BadRequest("Invalid pastry order data.");
+                }
+
+                if (await _dbPastryOrder.GetAsync(u => u.OrderName.ToLower() == createDTO.OrderName.ToLower()) != null)
+                {
+                    ModelState.AddModelError("ErrorsMessages", "Pastry order already exists!");
+                    return BadRequest(ModelState);
+                }
+
+                PastryOrder pastryOrderEntity = _mapper.Map<PastryOrder>(createDTO);
+                await _dbPastryOrder.CreateAsync(pastryOrderEntity);
+
+                _response.Result = _mapper.Map<PastryOrderDTO>(pastryOrderEntity);
+                _response.StatusCode = HttpStatusCode.Created;
+                return CreatedAtRoute("GetPastryOrder", new { id = pastryOrderEntity.PastryOrderId }, _response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [HttpDelete("{id:int}", Name = "DeletePastryOrder")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> DeletePastryOrder(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
+                var pastryOrderEntity = await _dbPastryOrder.GetAsync(u => u.PastryOrderId == id);
+                if (pastryOrderEntity == null)
+                {
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+
+                await _dbPastryOrder.DeletePastryOrderAsync(pastryOrderEntity);
+
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpPut("{id:int}", Name = "UpdatePastryOrder")]
+        public async Task<ActionResult<APIResponse>> UpdatePastryOrder(int id, [FromBody] PastryOrderDTO updateDTO)
+        {
+            try
+            {
+                if (updateDTO == null || id != updateDTO.PastryOrderId)
+                {
+                    return BadRequest();
+                }
+
+                PastryOrder model = _mapper.Map<PastryOrder>(updateDTO);
+
+                await _dbPastryOrder.UpdatePastryOrderAsync(model);
+                _response.StatusCode = HttpStatusCode.NoContent;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string>() { ex.ToString() };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
 
-            return pastryOrder;
         }
 
-        // PUT: api/PastryOrder/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPastryOrder(int id, PastryOrder pastryOrder)
+        [HttpPatch("{id:int}", Name = "UpdatePartialPastryOrder")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdatePartialPastryOrder(int id, JsonPatchDocument<PastryOrderDTO> patchDTO)
         {
-            if (id != pastryOrder.PastryOrderId)
+            if (patchDTO == null || id == 0)
             {
                 return BadRequest();
             }
 
-            _context.Entry(pastryOrder).State = EntityState.Modified;
+            var pastryOrderEntity = await _dbPastryOrder.GetAsync(u => u.PastryOrderId == id, tracked: false);
 
-            try
+            if (pastryOrderEntity == null)
             {
-                await _context.SaveChangesAsync();
+                return BadRequest();
             }
-            catch (DbUpdateConcurrencyException)
+
+            PastryOrderDTO pastryOrderDTO = _mapper.Map<PastryOrderDTO>(pastryOrderEntity);
+            patchDTO.ApplyTo(pastryOrderDTO, ModelState);
+
+            if (!ModelState.IsValid)
             {
-                if (!PastryOrderExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ModelState);
             }
+
+            PastryOrder model = _mapper.Map<PastryOrder>(pastryOrderDTO);
+            await _dbPastryOrder.UpdatePastryOrderAsync(model);
 
             return NoContent();
-        }
-
-        // POST: api/PastryOrder
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<PastryOrder>> PostPastryOrder(PastryOrder pastryOrder)
-        {
-            _context.PastryOrders.Add(pastryOrder);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPastryOrder", new { id = pastryOrder.PastryOrderId }, pastryOrder);
-        }
-
-        // DELETE: api/PastryOrder/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePastryOrder(int id)
-        {
-            var pastryOrder = await _context.PastryOrders.FindAsync(id);
-            if (pastryOrder == null)
-            {
-                return NotFound();
-            }
-
-            _context.PastryOrders.Remove(pastryOrder);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool PastryOrderExists(int id)
-        {
-            return _context.PastryOrders.Any(e => e.PastryOrderId == id);
         }
     }
 }
