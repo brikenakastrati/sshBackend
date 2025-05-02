@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using sshBackend1.Data;
 using sshBackend1.Repository.IRepository;
 using sshBackend1.Repository;
-using sshBackend1.Services;
+
 using sshBackend1.Models;
 using sshBackend1.Context;
 using sshBackend1.Middleware;
@@ -11,6 +11,9 @@ using System.Security.Cryptography.Xml;
 using Microsoft.OpenApi.Models;
 using System.Configuration;
 using Microsoft.AspNetCore.Mvc;
+using sshBackend1.Services.IServices;
+using sshBackend1.Services;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,24 +48,25 @@ builder.Services.AddScoped<IPastryRepository, PastryRepository>();
 builder.Services.AddScoped<IPastryOrderRepository, PastryOrderRepository>();
 builder.Services.AddScoped<IPastryTypeRepository, PastryTypeRepository>();
 builder.Services.AddScoped<IGuestRepository, GuestRepository>();
+builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
 
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
-builder.Services.AddApiVersioning(options =>
-{
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.DefaultApiVersion = new ApiVersion(1, 0);
-    options.ReportApiVersions = true;
-});
+//builder.Services.AddApiVersioning(options =>
+//{
+//    options.AssumeDefaultVersionWhenUnspecified = true;
+//    options.DefaultApiVersion = new ApiVersion(1, 0);
+//    options.ReportApiVersions = true;
+//});
 
-builder.Services.AddVersionedApiExplorer(options =>
-{
-    options.GroupNameFormat = "'v'VVV";
-    options.SubstituteApiVersionInUrl = true;
-});
+//builder.Services.AddVersionedApiExplorer(options =>
+//{
+//    options.GroupNameFormat = "'v'VVV";
+//    options.SubstituteApiVersionInUrl = true;
+//});
 
 var key = builder.Configuration.GetValue<string>("ApiSettings:Secret");
 
@@ -71,34 +75,34 @@ builder.Services.AddControllers().AddNewtonsoftJson().AddXmlDataContractSerializ
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Description =
-        "JWT Authorization header using the Bearer Scheme. \r\n\n\n" +
-        "Enter 'Beared' [space] and then your token in the text input below. \r\n\r\n" +
-        "Example: \"Bearer 12345abcdef\"",
-        Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Scheme = "Bearer"
+    //options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    //{
+    //    Description =
+    //    "JWT Authorization header using the Bearer Scheme. \r\n\n\n" +
+    //    "Enter 'Bearer' [space] and then your token in the text input below. \r\n\r\n" +
+    //    "Example: \"Bearer 12345abcdef\"",
+    //    Name = "Authorization",
+    //    In = ParameterLocation.Header,
+    //    Scheme = "Bearer"
 
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = ParameterLocation.Header
-            },
-            new List<string>()
-        }
-    });
+    //});
+    //options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    //{
+    //    {
+    //        new OpenApiSecurityScheme
+    //        {
+    //            Reference = new OpenApiReference
+    //                        {
+    //                            Type = ReferenceType.SecurityScheme,
+    //                            Id = "Bearer"
+    //                        },
+    //            Scheme = "oauth2",
+    //            Name = "Bearer",
+    //            In = ParameterLocation.Header
+    //        },
+    //        new List<string>()
+    //    }
+    //});
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1.0",
