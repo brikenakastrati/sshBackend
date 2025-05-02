@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 using System.Net;
 
 namespace sshBackend1.Controllers
@@ -15,12 +16,14 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IMenuTypeRepository _dbMenuType;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public MenuTypeController(IMenuTypeRepository dbMenuType, IMapper mapper)
+        public MenuTypeController(IMenuTypeRepository dbMenuType, IMapper mapper, ICacheService cacheService)
         {
             _dbMenuType = dbMenuType;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -29,7 +32,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<MenuType> menuTypeList = await _dbMenuType.GetAllAsync();
+                var menuTypeList = await _cacheService.GetOrAddAsync("menuTypeListCache",
+                  async () => await _dbMenuType.GetAllAsync(),
+                  TimeSpan.FromMinutes(1));
+                //IEnumerable<MenuType> menuTypeList = await _dbMenuType.GetAllAsync();
                 _response.Result = _mapper.Map<List<MenuTypeDTO>>(menuTypeList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
