@@ -7,6 +7,10 @@ using sshBackend1.Services;
 using sshBackend1.Models;
 using sshBackend1.Context;
 using sshBackend1.Middleware;
+using System.Security.Cryptography.Xml;
+using Microsoft.OpenApi.Models;
+using System.Configuration;
+using Microsoft.AspNetCore.Mvc;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,11 +51,75 @@ builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
 
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ReportApiVersions = true;
+});
+
+builder.Services.AddVersionedApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
+
+var key = builder.Configuration.GetValue<string>("ApiSettings:Secret");
 
 // ? Add controllers and API formatters
 builder.Services.AddControllers().AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description =
+        "JWT Authorization header using the Bearer Scheme. \r\n\n\n" +
+        "Enter 'Beared' [space] and then your token in the text input below. \r\n\r\n" +
+        "Example: \"Bearer 12345abcdef\"",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Scheme = "Bearer"
+
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1.0",
+        Title = "Event Planner",
+        Description = "API to manage Event Planner",
+        TermsOfService = new Uri("https://localhost:7197/terms_and_conditions"),
+        Contact = new OpenApiContact
+        {
+            Name = "Dotnetmastery",
+            Url = new Uri("https://dotnetmastery.com")
+        },
+        License = new OpenApiLicense
+        {
+            Name = "Example License",
+            Url = new Uri("https://localhost:7197/license")
+        }
+
+    });
+});
+builder.Services.AddMemoryCache();
+
 
 var app = builder.Build(); // ?? Do not register services after this!
 
@@ -59,7 +127,10 @@ var app = builder.Build(); // ?? Do not register services after this!
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Event_Planner");
+    });
 }
 
 app.UseHttpsRedirection();
