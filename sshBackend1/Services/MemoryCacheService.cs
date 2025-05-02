@@ -16,8 +16,13 @@ namespace sshBackend1.Services
         {
             if (!_cache.TryGetValue(key, out T value))
             {
+                Console.WriteLine($"[MemoryCache] MISS for key '{key}' — loading from database");
                 value = acquire();
                 _cache.Set(key, value, duration);
+            }
+            else
+            {
+                Console.WriteLine($"[MemoryCache] HIT for key '{key}' — returning from cache");
             }
             return value;
         }
@@ -26,11 +31,17 @@ namespace sshBackend1.Services
         {
             if (!_cache.TryGetValue(key, out T value))
             {
+                Console.WriteLine($"[MemoryCache] MISS for key '{key}' — loading from database");
                 value = await acquire();
                 _cache.Set(key, value, duration);
+            }
+            else
+            {
+                Console.WriteLine($"[MemoryCache] HIT for key '{key}' — returning from cache");
             }
             return value;
         }
     }
+
 
 }
