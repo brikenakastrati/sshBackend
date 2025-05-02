@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -18,12 +19,15 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IFlowerArrangementTypeRepository _dbFlowerArrangementType;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public FlowerArrangementTypeController(IFlowerArrangementTypeRepository dbFlowerArrangementType, IMapper mapper)
+
+        public FlowerArrangementTypeController(IFlowerArrangementTypeRepository dbFlowerArrangementType, IMapper mapper, ICacheService cacheService)
         {
             _dbFlowerArrangementType = dbFlowerArrangementType;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -32,7 +36,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<FlowerArrangementType> flowerArrangementTypeList = await _dbFlowerArrangementType.GetAllAsync();
+                var flowerArrangementTypeList = await _cacheService.GetOrAddAsync("FlowerArrangementTypeCache",
+                    async () => await _dbFlowerArrangementType.GetAllAsync(),
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<FlowerArrangementType> flowerArrangementTypeList = await _dbFlowerArrangementType.GetAllAsync();
                 _response.Result = _mapper.Map<List<FlowerArrangementTypeDTO>>(flowerArrangementTypeList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);

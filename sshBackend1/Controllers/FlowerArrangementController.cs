@@ -12,6 +12,7 @@ using sshBackend1.Data;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 
 
 namespace sshBackend1.Controllers
@@ -23,12 +24,14 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IFlowerArrangementRepository _dbFlowerArrangement;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public FlowerArrangementController(IFlowerArrangementRepository dbFlowerArrangement, IMapper mapper)
+        public FlowerArrangementController(IFlowerArrangementRepository dbFlowerArrangement, IMapper mapper, ICacheService cacheService)
         {
             _dbFlowerArrangement = dbFlowerArrangement;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -37,7 +40,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<FlowerArrangement> flowerArrangementList = await _dbFlowerArrangement.GetAllAsync();
+                var flowerArrangementList = await _cacheService.GetOrAddAsync("flowerArrangementCache",
+                    async () => await _dbFlowerArrangement.GetAllAsync(),
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<FlowerArrangement> flowerArrangementList = await _dbFlowerArrangement.GetAllAsync();
                 _response.Result = _mapper.Map<List<FlowerArrangementDTO>>(flowerArrangementList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
@@ -64,7 +70,7 @@ namespace sshBackend1.Controllers
                     return BadRequest(_response);
                 }
 
-                var flowerArrangementEntity = await _dbFlowerArrangement.GetAsync(u => u.FlowerArrangementId == id);
+                var flowerArrangementEntity = _dbFlowerArrangement.GetAsync(u => u.FlowerArrangementId == id);
                 if (flowerArrangementEntity == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
