@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 using System.Net;
 
 namespace sshBackend1.Controllers
@@ -15,12 +16,15 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IMusicProviderRepository _dbMusicProvider;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public MusicProviderController(IMusicProviderRepository dbMusicProvider, IMapper mapper)
+        public MusicProviderController(IMusicProviderRepository dbMusicProvider, IMapper mapper, ICacheService cacheService)
         {
             _dbMusicProvider = dbMusicProvider;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
+
         }
 
         [HttpGet]
@@ -29,7 +33,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<MusicProvider> musicProviderList = await _dbMusicProvider.GetAllAsync();
+                var musicProviderList = await _cacheService.GetOrAddAsync("musicProviderListCache",
+                   async () => await _dbMusicProvider.GetAllAsync(),
+                   TimeSpan.FromMinutes(1));
+                //IEnumerable<MusicProvider> musicProviderList = await _dbMusicProvider.GetAllAsync();
                 _response.Result = _mapper.Map<List<MusicProviderDTO>>(musicProviderList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
