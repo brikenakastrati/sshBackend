@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ using sshBackend1.Data;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 
 namespace sshBackend1.Controllers
 {
@@ -22,12 +24,14 @@ namespace sshBackend1.Controllers
         private readonly IMapper _mapper;
         private readonly IVenueRepository _dbVenue;
         protected APIResponse _response;
+        private readonly ICacheService _cacheService;
 
-        public VenueController(IVenueRepository dbVenue, IMapper mapper)
+        public VenueController(IVenueRepository dbVenue, IMapper mapper, ICacheService cacheService)
         {
             _dbVenue = dbVenue;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
 
         }
 
@@ -37,7 +41,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<Venue> venueList = await _dbVenue.GetAllAsync();
+                var venueList = await _cacheService.GetOrAddAsync("venueListCache", 
+                    async () => await _dbVenue.GetAllAsync(),
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<Venue> venueList = await _dbVenue.GetAllAsync();
                 _response.Result = _mapper.Map<List<VenueDTO>>(venueList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
