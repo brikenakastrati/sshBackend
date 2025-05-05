@@ -15,7 +15,7 @@ public partial class Guest
 
     public string GuestSurname { get; set; }
 
-    public int? GuestStatusId { get; set; }
+    public int? GuestStatus { get; set; }
 
     public int? EventId { get; set; }
 
@@ -23,7 +23,6 @@ public partial class Guest
 
     public virtual Event Event { get; set; }
 
-    public virtual GuestStatus GuestStatus { get; set; }
 
     public virtual Table Table { get; set; }
 
