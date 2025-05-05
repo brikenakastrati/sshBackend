@@ -12,6 +12,7 @@ using sshBackend1.Data;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 
 namespace sshBackend1.Controllers
 {
@@ -22,12 +23,14 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IMusicProviderOrderRepository _dbMusicProviderOrder;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public MusicProviderOrderController(IMusicProviderOrderRepository dbMusicProviderOrder, IMapper mapper)
+        public MusicProviderOrderController(IMusicProviderOrderRepository dbMusicProviderOrder, IMapper mapper, ICacheService cacheService)
         {
             _dbMusicProviderOrder = dbMusicProviderOrder;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -36,7 +39,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<MusicProviderOrder> musicProviderOrderList = await _dbMusicProviderOrder.GetAllAsync();
+                var musicProviderOrderList = await _cacheService.GetOrAddAsync("musicProviderOrderListCache",
+                   async () => await _dbMusicProviderOrder.GetAllAsync(),
+                   TimeSpan.FromMinutes(1));
+                //IEnumerable<MusicProviderOrder> musicProviderOrderList = await _dbMusicProviderOrder.GetAllAsync();
                 _response.Result = _mapper.Map<List<MusicProviderOrderDTO>>(musicProviderOrderList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
