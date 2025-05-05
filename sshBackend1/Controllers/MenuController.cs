@@ -12,6 +12,7 @@ using sshBackend1.Data;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 
 namespace sshBackend1.Controllers
 {
@@ -22,12 +23,15 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IMenuRepository _dbMenu;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public MenuController(IMenuRepository dbMenu, IMapper mapper)
+
+        public MenuController(IMenuRepository dbMenu, IMapper mapper, ICacheService cacheService)
         {
             _dbMenu = dbMenu;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -36,7 +40,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<Menu> menuList = await _dbMenu.GetAllAsync();
+                var menuList = await _cacheService.GetOrAddAsync("menuListCache",
+                    async () => await _dbMenu.GetAllAsync(),
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<Menu> menuList = await _dbMenu.GetAllAsync();
                 _response.Result = _mapper.Map<List<MenuDTO>>(menuList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);

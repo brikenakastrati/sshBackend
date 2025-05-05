@@ -1,12 +1,12 @@
 ﻿using sshBackend1.Models;
-using sshBackend1.Services.Interfaces;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace sshBackend1.Models;
 
-public partial class Florist : ITenantEntity
+public partial class Florist 
 {
     [Key]
     public int FloristId { get; set; }

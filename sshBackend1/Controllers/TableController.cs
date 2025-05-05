@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -18,12 +19,14 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly ITableRepository _dbTable;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public TableController(ITableRepository dbTable, IMapper mapper)
+        public TableController(ITableRepository dbTable, IMapper mapper, ICacheService cacheService)
         {
             _dbTable = dbTable;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -32,7 +35,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<Table> tableList = await _dbTable.GetAllAsync();
+                var tableList = await _cacheService.GetOrAddAsync("tableListCache",
+                    async () => await _dbTable.GetAllAsync(), 
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<Table> tableList = await _dbTable.GetAllAsync();
                 _response.Result = _mapper.Map<List<TableDTO>>(tableList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -18,12 +19,14 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IEventRepository _dbEvent;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public EventController(IEventRepository dbEvent, IMapper mapper)
+        public EventController(IEventRepository dbEvent, IMapper mapper, ICacheService cacheService)
         {
             _dbEvent = dbEvent;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -32,7 +35,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<Event> eventList = await _dbEvent.GetAllAsync();
+                 var eventList = await _cacheService.GetOrAddAsync("eventListCache",
+                    async () => await _dbEvent.GetAllAsync(),
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<Event> eventList = await _dbEvent.GetAllAsync();
                 _response.Result = _mapper.Map<List<EventDTO>>(eventList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);

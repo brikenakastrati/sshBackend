@@ -12,6 +12,8 @@ using sshBackend1.Data;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
+
 
 namespace sshBackend1.Controllers
 {
@@ -22,12 +24,14 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IFloristRepository _dbFlorist;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public FloristController(IFloristRepository dbFlorist, IMapper mapper)
+        public FloristController(IFloristRepository dbFlorist, IMapper mapper, ICacheService cacheService)
         {
             _dbFlorist = dbFlorist;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -36,7 +40,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<Florist> floristList = await _dbFlorist.GetAllAsync();
+                var floristList = await _cacheService.GetOrAddAsync("floristListCache",
+                   async () => await _dbFlorist.GetAllAsync(),
+                   TimeSpan.FromMinutes(1));
+                //IEnumerable<Florist> floristList = await _dbFlorist.GetAllAsync();
                 _response.Result = _mapper.Map<List<FloristDTO>>(floristList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);

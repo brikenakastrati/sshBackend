@@ -5,6 +5,7 @@ using sshBackend1.Models.DTOs;
 using sshBackend1.Models;
 using sshBackend1.Repository.IRepository;
 using System.Net;
+using sshBackend1.Services.IServices;
 
 namespace sshBackend1.Controllers
 {
@@ -15,12 +16,15 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IOrderStatusRepository _dbOrderStatus;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public OrderStatusController(IOrderStatusRepository dbOrderStatus, IMapper mapper)
+
+        public OrderStatusController(IOrderStatusRepository dbOrderStatus, IMapper mapper, ICacheService cacheService)
         {
             _dbOrderStatus = dbOrderStatus;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -29,7 +33,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<OrderStatus> orderStatusList = await _dbOrderStatus.GetAllAsync();
+                var orderStatusList = await _cacheService.GetOrAddAsync("orderStatusListCache",
+                    async () => await _dbOrderStatus.GetAllAsync(),
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<OrderStatus> orderStatusList = await _dbOrderStatus.GetAllAsync();
                 _response.Result = _mapper.Map<List<OrderStatusDTO>>(orderStatusList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -18,12 +19,14 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IPerformerTypeRepository _dbPerformerType;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public PerformerTypeController(IPerformerTypeRepository dbPerformerType, IMapper mapper)
+        public PerformerTypeController(IPerformerTypeRepository dbPerformerType, IMapper mapper, ICacheService cacheService)
         {
             _dbPerformerType = dbPerformerType;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -32,7 +35,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<PerformerType> performerTypeList = await _dbPerformerType.GetAllAsync();
+                var performerTypeList = await _cacheService.GetOrAddAsync("performerTypeListCache",
+                    async () => await _dbPerformerType.GetAllAsync(),
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<PerformerType> performerTypeList = await _dbPerformerType.GetAllAsync();
                 _response.Result = _mapper.Map<List<PerformerTypeDTO>>(performerTypeList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);

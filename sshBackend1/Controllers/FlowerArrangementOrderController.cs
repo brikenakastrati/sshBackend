@@ -12,6 +12,7 @@ using sshBackend1.Data;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 
 
 namespace sshBackend1.Controllers
@@ -23,12 +24,15 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IFlowerArrangementOrderRepository _dbFlowerArrangementOrder;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public FlowerArrangementOrderController(IFlowerArrangementOrderRepository dbFlowerArrangementOrder, IMapper mapper)
+
+        public FlowerArrangementOrderController(IFlowerArrangementOrderRepository dbFlowerArrangementOrder, IMapper mapper, ICacheService cacheService)
         {
             _dbFlowerArrangementOrder = dbFlowerArrangementOrder;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -37,7 +41,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<FlowerArrangementOrder> flowerArrangementOrdersList = await _dbFlowerArrangementOrder.GetAllAsync();
+                var flowerArrangementOrdersList = await _cacheService.GetOrAddAsync("flowerArrangementOrdersListCache",
+                    async () => await _dbFlowerArrangementOrder.GetAllAsync(),
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<FlowerArrangementOrder> flowerArrangementOrdersList = await _dbFlowerArrangementOrder.GetAllAsync();
                 _response.Result = _mapper.Map<List<FlowerArrangementOrderDTO>>(flowerArrangementOrdersList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);

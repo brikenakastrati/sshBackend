@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -18,12 +19,13 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IRestaurantStatusRepository _dbRestaurantStatus;
         private readonly IMapper _mapper;
-
-        public RestaurantStatusController(IRestaurantStatusRepository dbRestaurantStatus, IMapper mapper)
+        private readonly ICacheService _cacheService;
+        public RestaurantStatusController(IRestaurantStatusRepository dbRestaurantStatus, IMapper mapper, ICacheService cacheService)
         {
             _dbRestaurantStatus = dbRestaurantStatus;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -32,7 +34,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<RestaurantStatus> restaurantStatusList = await _dbRestaurantStatus.GetAllAsync();
+                var restaurantStatusList = await _cacheService.GetOrAddAsync("restaurantStatusListCache", 
+                    async () => await _dbRestaurantStatus.GetAllAsync(),
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<RestaurantStatus> restaurantStatusList = await _dbRestaurantStatus.GetAllAsync();
                 _response.Result = _mapper.Map<List<RestaurantStatusDTO>>(restaurantStatusList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -18,12 +19,14 @@ namespace sshBackend1.Controllers
         protected APIResponse _response;
         private readonly IPlaylistItemRepository _dbPlaylistItem;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
 
-        public PlaylistItemController(IPlaylistItemRepository dbPlaylistItem, IMapper mapper)
+        public PlaylistItemController(IPlaylistItemRepository dbPlaylistItem, IMapper mapper, ICacheService cacheService)
         {
             _dbPlaylistItem = dbPlaylistItem;
             _mapper = mapper;
             _response = new();
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -32,7 +35,10 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<PlaylistItem> PlaylistItemList = await _dbPlaylistItem.GetAllAsync();
+                var PlaylistItemList = await _cacheService.GetOrAddAsync("PlaylistItemListCache",
+                    async () => await _dbPlaylistItem.GetAllAsync(),
+                    TimeSpan.FromMinutes(1));
+                //IEnumerable<PlaylistItem> PlaylistItemList = await _dbPlaylistItem.GetAllAsync();
                 _response.Result = _mapper.Map<List<PlaylistItemDTO>>(PlaylistItemList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
