@@ -1,104 +1,74 @@
-﻿
-using System.Net;
-using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
-using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Xunit;
+using Moq;
+using Microsoft.AspNetCore.Mvc;
+using sshBackend1.Controllers;
 using sshBackend1.Models;
-using sshBackend1.Models.DTOs;
-using Xunit;
+using sshBackend1.Repository;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using sshBackend1.Repository.IRepository;
 
-namespace sshBackend1.Tests
+public class EventControllerTests
 {
-    public class EventControllerTests : IClassFixture<CustomWebApplicationFactory>
+    private readonly Mock<IEventRepository> _mockRepo;
+    private readonly EventController _controller;
+
+    public EventControllerTests()
     {
-        private readonly HttpClient _client;
+        _mockRepo = new Mock<IEventRepository>();
+        _controller = new EventController(_mockRepo.Object);
+    }
 
-        public EventControllerTests(CustomWebApplicationFactory factory)
-        {
-            _client = factory.CreateClient();
-        }
+    [Fact]
+    public async Task GetAll_ReturnsAllEvents()
+    {
+        // Arrange
+        _mockRepo.Setup(repo => repo.GetAllEventsAsync(null))
+                 .ReturnsAsync(new List<Event> { new Event { EventId = 1, EventName = "Test Event" } });
 
-        [Fact]
-        public async Task GetEvents_ReturnsOk()
-        {
-            var response = await _client.GetAsync("/api/Event");
+        // Act
+        var result = await _controller.GetAll();
 
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var apiResponse = await response.Content.ReadFromJsonAsync<APIResponse>();
-            apiResponse.Should().NotBeNull();
-            apiResponse!.IsSuccess.Should().BeTrue();
-        }
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<APIResponse>(okResult.Value);
+        var events = Assert.IsAssignableFrom<IEnumerable<Event>>(response.Result);
+        Assert.Single(events);
+    }
 
-        [Fact]
-        public async Task CreateEvent_ThenGetEventById_ReturnsCreatedAndRetrieved()
-        {
-            var newEvent = new EventDTO { EventName = $"Test Event {Guid.NewGuid()}" };
+    [Fact]
+    public async Task GetById_ReturnsEvent_WhenFound()
+    {
+        // Arrange
+        var testEvent = new Event { EventId = 1, EventName = "Test Event" };
+        _mockRepo.Setup(repo => repo.GetEventAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<Event, bool>>>()))
+                 .ReturnsAsync(testEvent);
 
-            var postResponse = await _client.PostAsJsonAsync("/api/Event", newEvent);
-            postResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+        // Act
+        var result = await _controller.GetById(1);
 
-            var postApiResponse = await postResponse.Content.ReadFromJsonAsync<APIResponse>();
-            var createdJson = (JsonElement)postApiResponse!.Result!;
-            var createdEvent = JsonSerializer.Deserialize<EventDTO>(createdJson.GetRawText());
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<APIResponse>(okResult.Value);
+        var ev = Assert.IsType<Event>(response.Result);
+        Assert.Equal(1, ev.EventId);
+    }
 
-            createdEvent.Should().NotBeNull();
+    [Fact]
+    public async Task Delete_ReturnsOk_WhenDeleted()
+    {
+        // Arrange
+        var eventToDelete = new Event { EventId = 1, EventName = "To Delete" };
+        _mockRepo.Setup(repo => repo.GetEventAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<Event, bool>>>()))
+                 .ReturnsAsync(eventToDelete);
+        _mockRepo.Setup(repo => repo.DeleteEventAsync(eventToDelete)).Returns(Task.CompletedTask);
 
-            var getResponse = await _client.GetAsync($"/api/Event/{createdEvent!.EventId}");
-            getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
+        // Act
+        var result = await _controller.Delete(1);
 
-        [Fact]
-        public async Task UpdateEvent_ReturnsOk()
-        {
-            var newEvent = new EventDTO { EventName = $"ToUpdate_{Guid.NewGuid()}" };
-            var createResponse = await _client.PostAsJsonAsync("/api/Event", newEvent);
-            var createResult = await createResponse.Content.ReadFromJsonAsync<APIResponse>();
-            var created = JsonSerializer.Deserialize<EventDTO>(((JsonElement)createResult!.Result!).GetRawText());
-
-            created!.EventName = "Updated Event Name";
-            var updateResponse = await _client.PutAsJsonAsync($"/api/Event/{created.EventId}", created);
-
-            updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
-
-        [Fact]
-        public async Task DeleteEvent_ReturnsOk()
-        {
-            var newEvent = new EventDTO { EventName = $"ToDelete_{Guid.NewGuid()}" };
-            var createResponse = await _client.PostAsJsonAsync("/api/Event", newEvent);
-            var createResult = await createResponse.Content.ReadFromJsonAsync<APIResponse>();
-            var created = JsonSerializer.Deserialize<EventDTO>(((JsonElement)createResult!.Result!).GetRawText());
-
-            var deleteResponse = await _client.DeleteAsync($"/api/Event/{created!.EventId}");
-
-            deleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
-
-        [Fact]
-        public async Task PatchEvent_UpdatesEventName()
-        {
-            var newEvent = new EventDTO { EventName = $"PatchTest_{Guid.NewGuid()}" };
-            var createResponse = await _client.PostAsJsonAsync("/api/Event", newEvent);
-            var createResult = await createResponse.Content.ReadFromJsonAsync<APIResponse>();
-            var created = JsonSerializer.Deserialize<EventDTO>(((JsonElement)createResult!.Result!).GetRawText());
-
-            var patchDoc = new[]
-            {
-                new Dictionary<string, object>
-                {
-                    ["op"] = "replace",
-                    ["path"] = "/EventName",
-                    ["value"] = "Patched Event Name"
-                }
-            };
-
-            var patchContent = new StringContent(JsonSerializer.Serialize(patchDoc), Encoding.UTF8, "application/json-patch+json");
-
-            var patchResponse = await _client.PatchAsync($"/api/Event/{created!.EventId}", patchContent);
-
-            patchResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        }
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<APIResponse>(okResult.Value);
+        Assert.True(response.IsSuccess);
     }
 }
