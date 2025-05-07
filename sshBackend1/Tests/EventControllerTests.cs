@@ -55,6 +55,34 @@ public class EventControllerTests
     }
 
     [Fact]
+    public async Task Update_ReturnsUpdatedEvent_WhenSuccessful()
+    {
+        // Arrange
+        var eventId = 1;
+        var existingEvent = new Event { EventId = eventId, EventName = "Old Event" };
+        var updatedEvent = new Event { EventId = eventId, EventName = "Updated Event" };
+
+        _mockRepo.Setup(repo => repo.GetEventAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<Event, bool>>>()))
+                 .ReturnsAsync(existingEvent);
+
+        _mockRepo.Setup(repo => repo.UpdateEventAsync(updatedEvent))
+                 .ReturnsAsync(updatedEvent);
+
+        _mockRepo.Setup(repo => repo.SaveAsync()).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _controller.Update(eventId, updatedEvent);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<APIResponse>(okResult.Value);
+        var ev = Assert.IsType<Event>(response.Result);
+        Assert.Equal("Updated Event", ev.EventName);
+        Assert.True(response.IsSuccess);
+    }
+
+
+    [Fact]
     public async Task Delete_ReturnsOk_WhenDeleted()
     {
         // Arrange
