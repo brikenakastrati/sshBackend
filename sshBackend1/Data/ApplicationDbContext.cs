@@ -47,5 +47,7 @@ namespace sshBackend1.Data
         public DbSet<VenueType> VenueTypes { get; set; }
         public DbSet<VenueProvider> VenueProviders { get; set; }
 
+        public DbSet<Roles> Roles { get; set; }
+
     }
 }
