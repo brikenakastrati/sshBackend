@@ -33,6 +33,5 @@ public partial class MusicProviderOrder
 
     public virtual OrderStatus OrderStatus { get; set; }
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+ 
 }

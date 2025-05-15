@@ -15,6 +15,5 @@ public partial class PastryType
 
     public virtual ICollection<Pastry> Pastries { get; set; } = new List<Pastry>();
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+
 }

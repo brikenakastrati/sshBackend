@@ -17,7 +17,7 @@ public class Event
 
     public DateTime? EventDate { get; set; }
 
-    public string TenantId { get; set; }
+
     public virtual ICollection<FlowerArrangementOrder> FlowerArrangementOrders { get; set; } = new List<FlowerArrangementOrder>();
 
     public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();

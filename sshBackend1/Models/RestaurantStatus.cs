@@ -11,7 +11,6 @@ namespace sshBackend1.Models
         public string Description { get; set; } // A brief description of the status
         public DateTime LastUpdated { get; set; } // The last time the status was updated
                                                   
-        // Fusha për multi-tenancy
-        public string TenantId { get; set; }
+ 
     }
 }

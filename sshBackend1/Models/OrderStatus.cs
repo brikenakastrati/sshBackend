@@ -25,6 +25,5 @@ public partial class OrderStatus
 
     public virtual ICollection<VenueOrder> VenueOrders { get; set; } = new List<VenueOrder>();
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+
 }

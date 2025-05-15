@@ -24,6 +24,5 @@ public partial class PartnerStatus
 
     public virtual ICollection<VenueProvider> VenueProviders { get; set; } = new List<VenueProvider>();
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+
 }

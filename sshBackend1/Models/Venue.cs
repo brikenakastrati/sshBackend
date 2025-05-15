@@ -28,6 +28,5 @@ public partial class Venue
     public virtual ICollection<Restaurant> Restaurant { get; set; } = new List<Restaurant>();
     public virtual VenueType VenueType { get; set; }
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+  
 }

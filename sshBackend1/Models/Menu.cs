@@ -23,6 +23,5 @@ public partial class Menu
 
     public virtual MenuType MenuType { get; set; }
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+
 }

@@ -26,6 +26,5 @@ public partial class Guest
 
     public virtual Table Table { get; set; }
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+
 }
