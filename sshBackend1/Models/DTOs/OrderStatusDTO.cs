@@ -13,7 +13,7 @@ namespace sshBackend1.Models.DTOs
 
         public string OrderStatusName { get; set; }
 
-        public string TenantId { get; set; }
+       
 
     }
 }

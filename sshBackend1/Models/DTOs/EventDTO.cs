@@ -15,6 +15,6 @@ namespace sshBackend1.Models.DTOs
 
         public DateTime? EventDate { get; set; }
 
-        public string TenantId { get; set; }
+      
     }
 }
