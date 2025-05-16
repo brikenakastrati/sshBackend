@@ -20,6 +20,6 @@ namespace sshBackend1.Models.DTOs
 
         public string Length { get; set; }
 
-        public string TenantId { get; set; }
+       
     }
 }

@@ -23,7 +23,6 @@ namespace sshBackend1.Models.DTOs
 
         public int? OrderStatusId { get; set; }
 
-        // Fusha për multi-tenancy
-        public string TenantId { get; set; }
+        
     }
 }

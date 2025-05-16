@@ -13,7 +13,7 @@ public class Event
 
     public string EventName { get; set; }
 
-    public int? EventTypeId { get; set; }
+    public string EventType { get; set; }
 
     public DateTime? EventDate { get; set; }
 

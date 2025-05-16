@@ -8,6 +8,6 @@
         public int? EventId { get; set; }
 
 
-        public string TenantId { get; set; }
+      
     }
 }

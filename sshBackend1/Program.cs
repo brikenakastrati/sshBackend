@@ -1,18 +1,18 @@
-using sshBackend1;
-using Microsoft.EntityFrameworkCore;
-using sshBackend1.Data;
-using sshBackend1.Repository.IRepository;
-using sshBackend1.Repository;
-
-using sshBackend1.Models;
-using sshBackend1.Context;
-using sshBackend1.Middleware;
-using System.Security.Cryptography.Xml;
-using Microsoft.OpenApi.Models;
-using System.Configuration;
+using MagicVilla_VillaAPI.Repository;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using sshBackend1.Services.IServices;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using sshBackend1;
+using sshBackend1.Data;
+using sshBackend1.Middleware;
+using sshBackend1.Models;
+using sshBackend1.Repository;
+using sshBackend1.Repository.IRepository;
 using sshBackend1.Services;
+using sshBackend1.Services.IServices;
+using System.Configuration;
+using System.Security.Cryptography.Xml;
 
 
 
@@ -49,9 +49,13 @@ builder.Services.AddScoped<IPastryOrderRepository, PastryOrderRepository>();
 builder.Services.AddScoped<IPastryTypeRepository, PastryTypeRepository>();
 builder.Services.AddScoped<IGuestRepository, GuestRepository>();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
+builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
 
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
@@ -126,6 +130,12 @@ builder.Services.AddMemoryCache();
 
 
 var app = builder.Build(); // ?? Do not register services after this!
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+    await SeedRolesAsync(serviceProvider);
+}
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -147,5 +157,20 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+async Task SeedRolesAsync(IServiceProvider serviceProvider)
+{
+    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    string[] roles = { "ADMIN", "CLIENT", "VENDOR" };
+
+    foreach (var role in roles)
+    {
+        var roleExists = await roleManager.RoleExistsAsync(role);
+        if (!roleExists)
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
+
 
 

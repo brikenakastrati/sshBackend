@@ -6,7 +6,7 @@ using sshBackend1.Models;
 namespace sshBackend1.Data
 
 {
-    public class ApplicationDbContext:DbContext
+    public class ApplicationDbContext: IdentityDbContext<ApplicationUser>
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -41,13 +41,14 @@ namespace sshBackend1.Data
         public DbSet<Restaurant> Restaurants{ get; set; }
         public DbSet<RestaurantStatus> RestaurantStatuses{ get; set; }
         public DbSet<Table> Tables { get; set; }
-        public DbSet<Users> Users { get; set; }
+   
         public DbSet<Venue> Venues { get; set; }
         public DbSet<VenueOrder> VenueOrders { get; set; }
         public DbSet<VenueType> VenueTypes { get; set; }
         public DbSet<VenueProvider> VenueProviders { get; set; }
 
-        public DbSet<Roles> Roles { get; set; }
+       
+        //public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
     }
 }
