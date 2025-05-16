@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using sshBackend1.Models;
@@ -88,6 +89,8 @@ namespace sshBackend1.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "CLIENT")]
+        [HttpPost]
         public async Task<ActionResult<APIResponse>> CreateEvent([FromBody] EventDTO createDTO)
         {
             try
@@ -97,13 +100,24 @@ namespace sshBackend1.Controllers
                     return BadRequest("Invalid event data.");
                 }
 
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (userId == null)
+                {
+                    _response.StatusCode = HttpStatusCode.Unauthorized;
+                    _response.IsSuccess = false;
+                    _response.ErrorsMessages.Add("User not authorized.");
+                    return Unauthorized(_response);
+                }
+
                 if (await _dbEvent.GetAsync(u => u.EventName.ToLower() == createDTO.EventName.ToLower()) != null)
                 {
                     ModelState.AddModelError("ErrorsMessages", "Event already exists!");
                     return BadRequest(ModelState);
                 }
 
-                Event eventEntity = _mapper.Map<Event>(createDTO);
+                var eventEntity = _mapper.Map<Event>(createDTO);
+                eventEntity.ApplicationUserId = userId; 
+
                 await _dbEvent.CreateAsync(eventEntity);
 
                 _response.Result = _mapper.Map<EventDTO>(eventEntity);
@@ -117,6 +131,7 @@ namespace sshBackend1.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
         }
+
 
         [HttpDelete("{id:int}", Name = "DeleteEvent")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -212,6 +227,30 @@ namespace sshBackend1.Controllers
 
             return NoContent();
         }
+
+
+        [Authorize(Roles = "client")]
+        [HttpGet("mine")]
+        public async Task<ActionResult<APIResponse>> GetMyEvents()
+        {
+            try
+            {
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                var events = await _dbEvent.GetAllAsync(e => e.ApplicationUserId == userId);
+
+                _response.Result = _mapper.Map<List<EventDTO>>(events);
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
 
 
     }
