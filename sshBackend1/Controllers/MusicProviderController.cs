@@ -92,7 +92,7 @@ namespace sshBackend1.Controllers
             {
                 if (createDTO == null)
                 {
-                    return BadRequest("Invalid MusicP rovider data.");
+                    return BadRequest("Invalid Music Provider data.");
                 }
 
                 if (await _dbMusicProvider.GetAsync(u => u.Name.ToLower() == createDTO.Name.ToLower()) != null)
