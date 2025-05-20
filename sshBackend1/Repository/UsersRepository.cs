@@ -52,16 +52,24 @@ namespace MagicVilla_VillaAPI.Repository
             var roles = await _userManager.GetRolesAsync(user);
             var key = Encoding.ASCII.GetBytes(secretKey);
 
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),        
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),     
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Role, roles.FirstOrDefault() ?? "CLIENT")
+            };
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.Role, roles.FirstOrDefault() ?? "customer")
-        }),
+                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
+
+
+
+
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
