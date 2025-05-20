@@ -8,8 +8,7 @@ using Microsoft.OpenApi.Models;
 using sshBackend1;
 
 using sshBackend1.Data;
-
-
+using sshBackend1.Helpers;
 using sshBackend1.Middleware;
 using sshBackend1.Models;
 using sshBackend1.Repository;
@@ -61,6 +60,8 @@ builder.Services.AddScoped<IPastryTypeRepository, PastryTypeRepository>();
 //builder.Services.AddScoped<IGuestRepository, GuestRepository>();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+builder.Services.AddScoped<JwtTokenHelper>();
+
 
 
 builder.Services.AddHttpContextAccessor();
