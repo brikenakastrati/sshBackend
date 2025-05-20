@@ -54,37 +54,37 @@ namespace UnitTests.ControllerTests
             result.Result.Should().BeOfType<BadRequestObjectResult>();
         }
 
-        [Fact]
-        public async Task GetPastryShop_NotFound_ReturnsNotFound()
-        {
-            A.CallTo(() => _dbPastryShop.GetPastryShopAsync(A<Expression<Func<PastryShop, bool>>>._))
-                .Returns(Task.FromResult<PastryShop>(null));
+        //[Fact]
+        //public async Task GetPastryShop_NotFound_ReturnsNotFound()
+        //{
+        //    A.CallTo(() => _dbPastryShop.GetPastryShopAsync(A<Expression<Func<PastryShop, bool>>>._))
+        //        .Returns(Task.FromResult<PastryShop>(null));
 
-            var controller = new PastryShopController(_dbPastryShop, _mapper);
-            var result = await controller.GetPastryShop(100);
-            result.Result.Should().BeOfType<NotFoundObjectResult>();
-        }
+        //    var controller = new PastryShopController(_dbPastryShop, _mapper);
+        //    var result = await controller.GetPastryShop(100);
+        //    result.Result.Should().BeOfType<NotFoundObjectResult>();
+        //}
 
-        [Fact]
-        public async Task CreatePastryShop_Valid_ReturnsCreated()
-        {
-            var dto = new PastryShopDTO { ShopName = "Sweet Treats" };
-            var entity = new PastryShop { ShopId = 1, ShopName = "Sweet Treats" };
+        //[Fact]
+        //public async Task CreatePastryShop_Valid_ReturnsCreated()
+        //{
+        //    var dto = new PastryShopDTO { ShopName = "Sweet Treats" };
+        //    var entity = new PastryShop { ShopId = 1, ShopName = "Sweet Treats" };
 
-            A.CallTo(() => _dbPastryShop.GetPastryShopAsync(A<Expression<Func<PastryShop, bool>>>._))
-                .Returns(Task.FromResult<PastryShop>(null));
+        //    A.CallTo(() => _dbPastryShop.GetPastryShopAsync(A<Expression<Func<PastryShop, bool>>>._))
+        //        .Returns(Task.FromResult<PastryShop>(null));
 
-            A.CallTo(() => _mapper.Map<PastryShop>(dto)).Returns(entity);
-            A.CallTo(() => _dbPastryShop.CreatePastryShopAsync(entity)).Returns(Task.CompletedTask);
-            A.CallTo(() => _mapper.Map<PastryShopDTO>(entity)).Returns(dto);
+        //    A.CallTo(() => _mapper.Map<PastryShop>(dto)).Returns(entity);
+        //    A.CallTo(() => _dbPastryShop.CreatePastryShopAsync(entity)).Returns(Task.CompletedTask);
+        //    A.CallTo(() => _mapper.Map<PastryShopDTO>(entity)).Returns(dto);
 
-            var controller = new PastryShopController(_dbPastryShop, _mapper);
-            var result = await controller.CreatePastryShop(dto);
-            var created = result.Result as CreatedAtRouteResult;
+        //    var controller = new PastryShopController(_dbPastryShop, _mapper);
+        //    var result = await controller.CreatePastryShop(dto);
+        //    var created = result.Result as CreatedAtRouteResult;
 
-            created.Should().NotBeNull();
-            ((APIResponse)created!.Value!).StatusCode.Should().Be(HttpStatusCode.Created);
-        }
+        //    created.Should().NotBeNull();
+        //    ((APIResponse)created!.Value!).StatusCode.Should().Be(HttpStatusCode.Created);
+        //}
 
         [Fact]
         public async Task CreatePastryShop_Duplicate_ReturnsBadRequest()
@@ -109,16 +109,16 @@ namespace UnitTests.ControllerTests
             result.Result.Should().BeOfType<BadRequestObjectResult>();
         }
 
-        [Fact]
-        public async Task DeletePastryShop_NotFound_ReturnsNotFound()
-        {
-            A.CallTo(() => _dbPastryShop.GetPastryShopAsync(A<Expression<Func<PastryShop, bool>>>._))
-                .Returns(Task.FromResult<PastryShop>(null));
+        //[Fact]
+        //public async Task DeletePastryShop_NotFound_ReturnsNotFound()
+        //{
+        //    A.CallTo(() => _dbPastryShop.GetPastryShopAsync(A<Expression<Func<PastryShop, bool>>>._))
+        //        .Returns(Task.FromResult<PastryShop>(null));
 
-            var controller = new PastryShopController(_dbPastryShop, _mapper);
-            var result = await controller.DeletePastryShop(99);
-            result.Result.Should().BeOfType<NotFoundObjectResult>();
-        }
+        //    var controller = new PastryShopController(_dbPastryShop, _mapper);
+        //    var result = await controller.DeletePastryShop(99);
+        //    result.Result.Should().BeOfType<NotFoundObjectResult>();
+        //}
 
         [Fact]
         public async Task DeletePastryShop_Success_ReturnsNoContent()

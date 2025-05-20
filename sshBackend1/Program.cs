@@ -1,27 +1,33 @@
-using sshBackend1;
-using Microsoft.EntityFrameworkCore;
-using sshBackend1.Data;
-using sshBackend1.Repository.IRepository;
-using sshBackend1.Repository;
-
-using sshBackend1.Models;
-using sshBackend1.Context;
-using sshBackend1.Middleware;
-using System.Security.Cryptography.Xml;
-using Microsoft.OpenApi.Models;
-using System.Configuration;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using sshBackend1.Services.IServices;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using sshBackend1;
+using sshBackend1.Context;
+using sshBackend1.Data;
+using sshBackend1.Helpers;
+using sshBackend1.Middleware;
+using sshBackend1.Models;
+using sshBackend1.Repository;
+using sshBackend1.Repository.IRepository;
 using sshBackend1.Services;
-
-
+using sshBackend1.Services.IServices;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ? Add services to the container **before** calling `builder.Build()`
+// ----------------- Database -----------------
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection")));
 
+// ----------------- Identity -----------------
+builder.Services.AddIdentity<Users, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+// ----------------- Repositories -----------------
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IFloristRepository, FloristRepository>();
 builder.Services.AddScoped<IVenueProviderRepository, VenueProviderRepository>();
@@ -53,56 +59,52 @@ builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
 
-
+// ----------------- AutoMapper -----------------
 builder.Services.AddAutoMapper(typeof(MappingConfig));
-//builder.Services.AddApiVersioning(options =>
-//{
-//    options.AssumeDefaultVersionWhenUnspecified = true;
-//    options.DefaultApiVersion = new ApiVersion(1, 0);
-//    options.ReportApiVersions = true;
-//});
 
-//builder.Services.AddVersionedApiExplorer(options =>
-//{
-//    options.GroupNameFormat = "'v'VVV";
-//    options.SubstituteApiVersionInUrl = true;
-//});
+// ----------------- Jwt Token Helper -----------------
+builder.Services.AddScoped<JwtTokenHelper>();
 
-var key = builder.Configuration.GetValue<string>("ApiSettings:Secret");
+// ----------------- Memory Cache -----------------
+builder.Services.AddMemoryCache();
 
-// ? Add controllers and API formatters
-builder.Services.AddControllers().AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
+// ----------------- JWT Authentication -----------------
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings.GetValue<string>("Key");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+    };
+});
+
+// ----------------- Authorization -----------------
+builder.Services.AddAuthorization();
+
+// ----------------- Controllers -----------------
+builder.Services.AddControllers()
+    .AddNewtonsoftJson()
+    .AddXmlDataContractSerializerFormatters();
+
+// ----------------- Swagger -----------------
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    //options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    //{
-    //    Description =
-    //    "JWT Authorization header using the Bearer Scheme. \r\n\n\n" +
-    //    "Enter 'Bearer' [space] and then your token in the text input below. \r\n\r\n" +
-    //    "Example: \"Bearer 12345abcdef\"",
-    //    Name = "Authorization",
-    //    In = ParameterLocation.Header,
-    //    Scheme = "Bearer"
-
-    //});
-    //options.AddSecurityRequirement(new OpenApiSecurityRequirement()
-    //{
-    //    {
-    //        new OpenApiSecurityScheme
-    //        {
-    //            Reference = new OpenApiReference
-    //                        {
-    //                            Type = ReferenceType.SecurityScheme,
-    //                            Id = "Bearer"
-    //                        },
-    //            Scheme = "oauth2",
-    //            Name = "Bearer",
-    //            In = ParameterLocation.Header
-    //        },
-    //        new List<string>()
-    //    }
-    //});
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1.0",
@@ -119,15 +121,42 @@ builder.Services.AddSwaggerGen(options =>
             Name = "Example License",
             Url = new Uri("https://localhost:7197/license")
         }
+    });
 
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      \r\n\r\nExample: 'Bearer 12345abcdef'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+            },
+            new List<string>()
+        }
     });
 });
-builder.Services.AddMemoryCache();
 
+// ----------------- Build the App -----------------
+var app = builder.Build();
 
-var app = builder.Build(); // ?? Do not register services after this!
-
-// Configure the HTTP request pipeline.
+// ----------------- Middleware Pipeline -----------------
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -139,12 +168,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//  Vendos Middleware-in e Tenant-it para autorizimit
 app.UseMiddleware<TenantMiddleware>();
 
-
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
-
 app.Run();
-
