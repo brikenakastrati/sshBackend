@@ -38,9 +38,9 @@ namespace sshBackend1.Data
         public DbSet<PastryType> PastryTypes { get; set; }
         public DbSet<PerformerType> PerformerTypes { get; set; }
         public DbSet<PlaylistItem> PlaylistItems { get; set; }
-        public DbSet<Restaurant> Restaurants{ get; set; }
-        public DbSet<RestaurantStatus> RestaurantStatuses{ get; set; }
-        public DbSet<Table> Tables { get; set; }
+        //public DbSet<Restaurant> Restaurants{ get; set; }
+        //public DbSet<RestaurantStatus> RestaurantStatuses{ get; set; }
+        //public DbSet<Table> Tables { get; set; }
    
         public DbSet<Venue> Venues { get; set; }
         public DbSet<VenueOrder> VenueOrders { get; set; }
