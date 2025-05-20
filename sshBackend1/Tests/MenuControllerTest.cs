@@ -141,7 +141,7 @@ namespace UnitTests.ControllerTests
         {
             // Arrange
             var createDto = new MenuDTO { MenuName = "Test Menu" };
-            var createdEntity = new Menu { MenuId = 1, MenuName = "Test Menu" };
+            var createdEntity = new Menu { MenuId = 1, Chef_Name = "Test Menu" };
             var createdDto = new MenuDTO { MenuId = 1, MenuName = "Test Menu" };
 
             A.CallTo(() => _dbMenu.GetAsync(
@@ -173,7 +173,7 @@ namespace UnitTests.ControllerTests
         {
             // Arrange
             var createDto = new MenuDTO { MenuName = "Duplicate Menu" };
-            var existingMenu = new Menu { MenuId = 1, MenuName = "Duplicate Menu" };
+            var existingMenu = new Menu { MenuId = 1, Chef_Name = "Duplicate Menu" };
 
             A.CallTo(() => _dbMenu.GetAsync(
                 A<Expression<Func<Menu, bool>>>._, A<bool>._, A<string>._))
@@ -259,7 +259,7 @@ namespace UnitTests.ControllerTests
             var fakeMenu = new Menu
             {
                 MenuId = MenuId,
-                MenuName = "Sample Menu"
+                Chef_Name = "Sample Menu"
             };
 
             A.CallTo(() => _dbMenu.GetAsync(A<Expression<Func<Menu, bool>>>._, A<bool>._, A<string>._))
@@ -294,7 +294,7 @@ namespace UnitTests.ControllerTests
             // Arrange
             int MenuId = 1;
             var updateDto = new MenuDTO { MenuId = MenuId, MenuName = "Updated Menu" };
-            var mappedMenu = new Menu { MenuId = MenuId, MenuName = "Updated Menu" };
+            var mappedMenu = new Menu { MenuId = MenuId, Chef_Name = "Updated Menu" };
 
             A.CallTo(() => _mapper.Map<Menu>(updateDto)).Returns(mappedMenu);
             A.CallTo(() => _dbMenu.UpdateMenuAsync(A<Menu>.Ignored)).Returns(Task.FromResult(mappedMenu));

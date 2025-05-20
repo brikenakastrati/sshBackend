@@ -1,14 +1,14 @@
 
+using MagicVilla_VillaAPI.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using sshBackend1;
-using sshBackend1.Context;
+
 using sshBackend1.Data;
-using sshBackend1.Helpers;
+
 
 using sshBackend1.Middleware;
 using sshBackend1.Models;
@@ -19,9 +19,6 @@ using sshBackend1.Services.IServices;
 
 using System.Text;
 
-using System.Configuration;
-using System.Security.Cryptography.Xml;
-
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,9 +28,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection")));
 
 // ----------------- Identity -----------------
-builder.Services.AddIdentity<Users, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+//builder.Services.AddIdentity<Users, IdentityRole>()
+//    .AddEntityFrameworkStores<ApplicationDbContext>()
+//    .AddDefaultTokenProviders();
 
 // ----------------- Repositories -----------------
 builder.Services.AddScoped<IEventRepository, EventRepository>();
@@ -65,6 +62,7 @@ builder.Services.AddScoped<IPastryTypeRepository, PastryTypeRepository>();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -75,7 +73,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 // ----------------- Jwt Token Helper -----------------
-builder.Services.AddScoped<JwtTokenHelper>();
+
 
 // ----------------- Memory Cache -----------------
 builder.Services.AddMemoryCache();
@@ -88,22 +86,22 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-    };
 });
+//.AddJwtBearer(options =>
+//{
+//    options.RequireHttpsMetadata = false;
+//    options.SaveToken = true;
+//    options.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidateIssuer = true,
+//        ValidateAudience = true,
+//        ValidateLifetime = true,
+//        ValidateIssuerSigningKey = true,
+//        ValidIssuer = jwtSettings["Issuer"],
+//        ValidAudience = jwtSettings["Audience"],
+//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+//    };
+//});
 
 // ----------------- Authorization -----------------
 builder.Services.AddAuthorization();
