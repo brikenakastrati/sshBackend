@@ -36,9 +36,9 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                 var eventList = await _cacheService.GetOrAddAsync("eventListCache",
-                    async () => await _dbEvent.GetAllAsync(),
-                    TimeSpan.FromMinutes(1));
+                var eventList = await _cacheService.GetOrAddAsync("eventListCache",
+                   async () => await _dbEvent.GetAllAsync(),
+                   TimeSpan.FromMinutes(1));
                 //IEnumerable<Event> eventList = await _dbEvent.GetAllAsync();
                 _response.Result = _mapper.Map<List<EventDTO>>(eventList);
                 _response.StatusCode = HttpStatusCode.OK;
@@ -255,3 +255,115 @@ namespace sshBackend1.Controllers
 
     }
 }
+//using Microsoft.AspNetCore.JsonPatch;
+//using Microsoft.AspNetCore.Mvc;
+//using sshBackend1.Models;
+//using sshBackend1.Repository;
+//using sshBackend1.Models.DTOs;
+//using sshBackend1.Repository.IRepository;
+
+//namespace sshBackend1.Controllers
+//{
+//    [Route("api/[controller]")]
+//    [ApiController]
+//    public class EventController : ControllerBase
+//    {
+//        private readonly IEventRepository _eventRepo;
+//        private readonly APIResponse _response;
+
+//        public EventController(IEventRepository eventRepo)
+//        {
+//            _eventRepo = eventRepo;
+//            _response = new APIResponse();
+//        }
+
+//        [HttpGet]
+//        public async Task<ActionResult<APIResponse>> GetAll()
+//        {
+//            var events = await _eventRepo.GetAllEventsAsync();
+//            _response.Result = events;
+//            _response.IsSuccess = true;
+//            return Ok(_response);
+//        }
+
+//        [HttpGet("{id:int}")]
+//        public async Task<ActionResult<APIResponse>> GetById(int id)
+//        {
+//            var ev = await _eventRepo.GetEventAsync(e => e.EventId == id);
+//            if (ev == null)
+//            {
+//                _response.IsSuccess = false;
+//                _response.ErrorsMessages = new List<string> { "Event not found" };
+//                return NotFound(_response);
+//            }
+
+//            _response.Result = ev;
+//            _response.IsSuccess = true;
+//            return Ok(_response);
+//        }
+
+//        [HttpPost]
+//        public async Task<ActionResult<APIResponse>> Create([FromBody] Event eventDto)
+//        {
+//            if (!ModelState.IsValid)
+//            {
+//                _response.IsSuccess = false;
+//                _response.ErrorsMessages = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+//                return BadRequest(_response);
+//            }
+
+//            await _eventRepo.CreateEventAsync(eventDto);
+//            await _eventRepo.SaveAsync();
+
+//            _response.Result = eventDto;
+//            _response.IsSuccess = true;
+//            return CreatedAtAction(nameof(GetById), new { id = eventDto.EventId }, _response);
+//        }
+
+//        [HttpPut("{id:int}")]
+//        public async Task<ActionResult<APIResponse>> Update(int id, [FromBody] Event eventDto)
+//        {
+//            if (id != eventDto.EventId)
+//            {
+//                _response.IsSuccess = false;
+//                _response.ErrorsMessages = new List<string> { "Event ID mismatch" };
+//                return BadRequest(_response);
+//            }
+
+//            var existingEvent = await _eventRepo.GetEventAsync(e => e.EventId == id);
+//            if (existingEvent == null)
+//            {
+//                _response.IsSuccess = false;
+//                _response.ErrorsMessages = new List<string> { "Event not found" };
+//                return NotFound(_response);
+//            }
+
+//            await _eventRepo.UpdateEventAsync(eventDto);
+//            await _eventRepo.SaveAsync();
+
+//            _response.Result = eventDto;
+//            _response.IsSuccess = true;
+//            return Ok(_response);
+//        }
+
+//        [HttpDelete("{id:int}")]
+//        public async Task<ActionResult<APIResponse>> Delete(int id)
+//        {
+//            var eventToDelete = await _eventRepo.GetEventAsync(e => e.EventId == id);
+//            if (eventToDelete == null)
+//            {
+//                _response.IsSuccess = false;
+//                _response.ErrorsMessages = new List<string> { "Event not found" };
+//                return NotFound(_response);
+//            }
+
+//            await _eventRepo.DeleteEventAsync(eventToDelete);
+//            await _eventRepo.SaveAsync();
+
+//            _response.IsSuccess = true;
+//            _response.Result = $"Event {id} deleted successfully.";
+//            return Ok(_response);
+//        }
+//    }
+//}
+
