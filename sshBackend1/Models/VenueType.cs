@@ -11,6 +11,4 @@ public partial class VenueType
 
     public virtual ICollection<Venue> Venues { get; set; } = new List<Venue>();
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
 }

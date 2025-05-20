@@ -13,7 +13,6 @@ namespace sshBackend1.Models.DTOs
 
        
 
-        // Fusha për multi-tenancy
-        public string TenantId { get; set; }
+        
     }
 }

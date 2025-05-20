@@ -11,11 +11,11 @@ public partial class Menu
     [Key]
     public int MenuId { get; set; }
 
-    public string MenuName { get; set; }
+    public string Chef_Name { get; set; }
 
     public decimal Price { get; set; }
 
-    public int? CateringId { get; set; }
+ 
 
     public int? MenuTypeId { get; set; }
 
@@ -23,6 +23,5 @@ public partial class Menu
 
     public virtual MenuType MenuType { get; set; }
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+
 }

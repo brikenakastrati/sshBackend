@@ -102,7 +102,7 @@ namespace sshBackend1.Controllers
                     return BadRequest("Invalid Menu data.");
                 }
 
-                if (await _dbMenu.GetAsync(u => u.MenuName.ToLower() == createDTO.MenuName.ToLower()) != null)
+                if (await _dbMenu.GetAsync(u => u.Chef_Name.ToLower() == createDTO.MenuName.ToLower()) != null)
                 {
                     ModelState.AddModelError("ErrorsMessages", "Menu already exists!");
                     return BadRequest(ModelState);

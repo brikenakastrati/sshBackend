@@ -7,6 +7,6 @@
         public string Description { get; set; } 
         public DateTime LastUpdated { get; set; } 
 
-        public string TenantId { get; set; }
+       
     }
 }

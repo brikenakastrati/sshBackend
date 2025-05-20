@@ -20,7 +20,7 @@ namespace sshBackend1.Models.DTOs
         public decimal? AgencyFee { get; set; }
 
         public int? PartnerStatusId { get; set; }
-        public string TenantId { get; set; }
+       
 
 
     }

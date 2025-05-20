@@ -35,6 +35,6 @@ namespace sshBackend1.Models.DTOs
 
 
 
-        public string TenantId { get; set; }
+        
     }
 }

@@ -23,6 +23,6 @@ namespace sshBackend1.Models.DTOs
         public int? VenueTypeId { get; set; }
 
    
-        public string TenantId { get; set; }
+      
     }
 }

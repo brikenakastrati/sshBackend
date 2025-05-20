@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace sshBackend1.Models;
 
@@ -13,14 +14,14 @@ public class Event
 
     public string EventName { get; set; }
 
-    public int? EventTypeId { get; set; }
+    public string EventType { get; set; }
 
     public DateTime? EventDate { get; set; }
 
-    public string TenantId { get; set; }
+
     public virtual ICollection<FlowerArrangementOrder> FlowerArrangementOrders { get; set; } = new List<FlowerArrangementOrder>();
 
-    public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
+    //public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
 
     public virtual ICollection<MenuOrder> MenuOrders { get; set; } = new List<MenuOrder>();
 
@@ -29,4 +30,7 @@ public class Event
     public virtual ICollection<PastryOrder> PastryOrders { get; set; } = new List<PastryOrder>();
 
     public virtual ICollection<VenueOrder> VenueOrders { get; set; } = new List<VenueOrder>();
+    public string ApplicationUserId { get; set; }
+    [ForeignKey("ApplicationUserId")]
+    public ApplicationUser ApplicationUser { get; set; }
 }

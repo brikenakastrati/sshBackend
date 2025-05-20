@@ -44,6 +44,5 @@ public partial class MusicProvider
    
     public virtual ICollection<PlaylistItem> PlaylistItems { get; set; } = new List<PlaylistItem>();
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+
 }

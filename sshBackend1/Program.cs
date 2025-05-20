@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,13 +9,20 @@ using sshBackend1;
 using sshBackend1.Context;
 using sshBackend1.Data;
 using sshBackend1.Helpers;
+
 using sshBackend1.Middleware;
 using sshBackend1.Models;
 using sshBackend1.Repository;
 using sshBackend1.Repository.IRepository;
 using sshBackend1.Services;
 using sshBackend1.Services.IServices;
+
 using System.Text;
+
+using System.Configuration;
+using System.Security.Cryptography.Xml;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,9 +46,9 @@ builder.Services.AddScoped<IVenueOrderRepository, VenueOrderRepository>();
 builder.Services.AddScoped<IFlowerArrangementTypeRepository, FlowerArrangementTypeRepository>();
 builder.Services.AddScoped<IFlowerArrangementOrderRepository, FlowerArrangementOrderRepository>();
 builder.Services.AddScoped<IFlowerArrangementRepository, FlowerArrangementRepository>();
-builder.Services.AddScoped<IRestaurantStatusRepository, RestaurantStatusRepository>();
-builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
-builder.Services.AddScoped<ITableRepository, TableRepository>();
+//builder.Services.AddScoped<IRestaurantStatusRepository, RestaurantStatusRepository>();
+//builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+//builder.Services.AddScoped<ITableRepository, TableRepository>();
 builder.Services.AddScoped<IPerformerTypeRepository, PerformerTypeRepository>();
 builder.Services.AddScoped<IMusicProviderRepository, MusicProviderRepository>();
 builder.Services.AddScoped<IMusicProviderOrderRepository, MusicProviderOrderRepository>();
@@ -53,11 +61,15 @@ builder.Services.AddScoped<IPastryShopRepository, PastryShopRepository>();
 builder.Services.AddScoped<IPastryRepository, PastryRepository>();
 builder.Services.AddScoped<IPastryOrderRepository, PastryOrderRepository>();
 builder.Services.AddScoped<IPastryTypeRepository, PastryTypeRepository>();
-builder.Services.AddScoped<IGuestRepository, GuestRepository>();
+//builder.Services.AddScoped<IGuestRepository, GuestRepository>();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
+builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IContextProvider, HttpContextProvider>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
 
 // ----------------- AutoMapper -----------------
 builder.Services.AddAutoMapper(typeof(MappingConfig));
@@ -153,8 +165,10 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
 // ----------------- Build the App -----------------
 var app = builder.Build();
+
 
 // ----------------- Middleware Pipeline -----------------
 if (app.Environment.IsDevelopment())
@@ -172,6 +186,28 @@ app.UseMiddleware<TenantMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+
+app.MapControllers();
+
+app.Run();
+async Task SeedRolesAsync(IServiceProvider serviceProvider)
+{
+    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    string[] roles = { "ADMIN", "CLIENT", "VENDOR" };
+
+    foreach (var role in roles)
+    {
+        var roleExists = await roleManager.RoleExistsAsync(role);
+        if (!roleExists)
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
+
+
+
 
 app.MapControllers();
 app.Run();

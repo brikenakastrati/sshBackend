@@ -15,7 +15,7 @@ public partial class PlaylistItem
   
     public string Name { get; set; }
 
-    public int GenreId { get; set; }
+
 
    
     public int MusicProviderId { get; set; }
@@ -28,6 +28,5 @@ public partial class PlaylistItem
 
     public virtual MusicProvider MusicProvider { get; set; }
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+
 }

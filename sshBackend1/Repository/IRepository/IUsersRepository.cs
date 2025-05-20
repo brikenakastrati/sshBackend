@@ -1,17 +1,15 @@
 ﻿
 using Nest;
 using sshBackend1.Models;
+using sshBackend1.Models.DTOs;
 using System.Linq.Expressions;
 
 namespace sshBackend1.Repository.IRepository
 {
-    public interface IUsersRepository : IRepository<Users>
+    public interface IUsersRepository
     {
-        Task<IEnumerable<Users>> GetAllUsersAsync(Expression<Func<Users, bool>> filter = null);
-        Task<Users> GetUsersAsync(Expression<Func<Users, bool>> filter = null);
-        Task CreateUsersAsync(Users entity);
-        Task<Users> UpdateUsersAsync(Users entity);
-        Task DeleteUsersAsync(Users entity);
-        Task SaveAsync();
+        bool IsUniqueUser(string username);
+        Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO);
+        Task<ApplicationUserDTO> Register(RegisterationRequestDTO registerationRequestDTO);
     }
 }

@@ -26,7 +26,6 @@ public partial class FlowerArrangementOrder
     public virtual Event Event { get; set; }
     public virtual OrderStatus OrderStatus { get; set; }
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+   
 
 }

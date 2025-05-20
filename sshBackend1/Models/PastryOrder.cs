@@ -29,6 +29,5 @@ public partial class PastryOrder
 
     public virtual OrderStatus OrderStatus { get; set; }
 
-    // Fusha për multi-tenancy
-    public string TenantId { get; set; }
+
 }
