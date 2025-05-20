@@ -39,14 +39,14 @@ namespace sshBackend1
             CreateMap<FlowerArrangement, FlowerArrangementDTO>();
             CreateMap<FlowerArrangementDTO, FlowerArrangement>();
 
-            CreateMap<RestaurantStatus, RestaurantStatusDTO>();
-            CreateMap<RestaurantStatusDTO, RestaurantStatus>();
+            //CreateMap<RestaurantStatus, RestaurantStatusDTO>();
+            //CreateMap<RestaurantStatusDTO, RestaurantStatus>();
 
-            CreateMap<Restaurant, RestaurantDTO>();
-            CreateMap<RestaurantDTO, Restaurant>();
+            //CreateMap<Restaurant, RestaurantDTO>();
+            //CreateMap<RestaurantDTO, Restaurant>();
 
-            CreateMap<Table, TableDTO>();
-            CreateMap<TableDTO, Table>();
+            //CreateMap<Table, TableDTO>();
+            //CreateMap<TableDTO, Table>();
 
             CreateMap<PerformerType,PerformerTypeDTO>();
             CreateMap<PerformerTypeDTO, PerformerType>();
@@ -84,8 +84,8 @@ namespace sshBackend1
             CreateMap<PastryType, PastryTypeDTO>();
             CreateMap<PastryTypeDTO, PastryType>();
 
-            CreateMap<Guest,GuestDTO>();
-            CreateMap<GuestDTO, Guest>();
+            //CreateMap<Guest,GuestDTO>();
+            //CreateMap<GuestDTO, Guest>();
 
 
 

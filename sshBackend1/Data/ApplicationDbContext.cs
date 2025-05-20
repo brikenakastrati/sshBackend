@@ -23,7 +23,7 @@ namespace sshBackend1.Data
         public DbSet<FlowerArrangement> FlowerArrangements { get; set; }
         public DbSet<FlowerArrangementOrder> FlowerArrangementOrders { get; set; }
         public DbSet<FlowerArrangementType> FlowerArrangementTypes { get; set; }
-        public DbSet<Guest> Guests { get; set; }
+        //public DbSet<Guest> Guests { get; set; }
        
         public DbSet<Menu> Menu { get; set; }
         public DbSet<MenuOrder> MenuOrders { get; set; }

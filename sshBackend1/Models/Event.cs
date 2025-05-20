@@ -21,7 +21,7 @@ public class Event
 
     public virtual ICollection<FlowerArrangementOrder> FlowerArrangementOrders { get; set; } = new List<FlowerArrangementOrder>();
 
-    public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
+    //public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
 
     public virtual ICollection<MenuOrder> MenuOrders { get; set; } = new List<MenuOrder>();
 

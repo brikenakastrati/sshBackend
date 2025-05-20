@@ -47,7 +47,7 @@ builder.Services.AddScoped<IPastryShopRepository, PastryShopRepository>();
 builder.Services.AddScoped<IPastryRepository, PastryRepository>();
 builder.Services.AddScoped<IPastryOrderRepository, PastryOrderRepository>();
 builder.Services.AddScoped<IPastryTypeRepository, PastryTypeRepository>();
-builder.Services.AddScoped<IGuestRepository, GuestRepository>();
+//builder.Services.AddScoped<IGuestRepository, GuestRepository>();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
