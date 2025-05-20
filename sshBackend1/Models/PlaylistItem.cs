@@ -15,7 +15,7 @@ public partial class PlaylistItem
   
     public string Name { get; set; }
 
-    public int GenreId { get; set; }
+
 
    
     public int MusicProviderId { get; set; }
