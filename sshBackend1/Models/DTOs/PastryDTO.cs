@@ -17,6 +17,8 @@ namespace sshBackend1.Models.DTOs
 
         public int? PastryTypeId { get; set; }
 
-        
+        //public List<PastryShop> Pastries { get; set; }
+
+
     }
 }

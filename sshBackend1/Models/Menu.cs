@@ -14,8 +14,9 @@ public partial class Menu
     public string Chef_Name { get; set; }
 
     public decimal Price { get; set; }
+    public string Email { get; set; }
 
- 
+
 
     public int? MenuTypeId { get; set; }
 
