@@ -63,7 +63,7 @@ namespace UnitTests.ControllerTests
         [Fact]
         public async Task GetFlowerArrangementOrder_ValidId_ReturnsOk()
         {
-            var entity = new FlowerArrangementOrder { FlowerArrangementOrderId = 1, OrderName = "Sample Order" };
+            var entity = new FlowerArrangementOrder { FlowerArrangementOrderId = 1, Name = "Sample Order" };
             var dto = new FlowerArrangementOrderDTO { FlowerArrangementOrderId = 1, OrderName = "Sample Order" };
 
             A.CallTo(() => _dbOrderRepo.GetAsync(A<Expression<Func<FlowerArrangementOrder, bool>>>._, A<bool>._, A<string>._))
@@ -95,7 +95,7 @@ namespace UnitTests.ControllerTests
         public async Task CreateFlowerArrangementOrder_Valid_ReturnsCreated()
         {
             var dto = new FlowerArrangementOrderDTO { OrderName = "New Order" };
-            var entity = new FlowerArrangementOrder { FlowerArrangementOrderId = 1, OrderName = "New Order" };
+            var entity = new FlowerArrangementOrder { FlowerArrangementOrderId = 1, Name = "New Order" };
 
             A.CallTo(() => _dbOrderRepo.GetAsync(A<Expression<Func<FlowerArrangementOrder, bool>>>._, A<bool>._, A<string>._))
                 .Returns(Task.FromResult<FlowerArrangementOrder>(null));
@@ -115,7 +115,7 @@ namespace UnitTests.ControllerTests
         public async Task CreateFlowerArrangementOrder_Duplicate_ReturnsBadRequest()
         {
             var dto = new FlowerArrangementOrderDTO { OrderName = "Existing Order" };
-            var entity = new FlowerArrangementOrder { OrderName = "Existing Order" };
+            var entity = new FlowerArrangementOrder { Name = "Existing Order" };
 
             A.CallTo(() => _dbOrderRepo.GetAsync(A<Expression<Func<FlowerArrangementOrder, bool>>>._, A<bool>._, A<string>._))
                 .Returns(Task.FromResult(entity));
@@ -143,7 +143,7 @@ namespace UnitTests.ControllerTests
             // Arrange
             int FlowerArrangementOrderId = 1;
             var updateDto = new FlowerArrangementOrderDTO { FlowerArrangementOrderId = FlowerArrangementOrderId, OrderName = "Updated FlowerArrangementOrder" };
-            var mappedFlowerArrangementOrder = new FlowerArrangementOrder { FlowerArrangementOrderId = FlowerArrangementOrderId, OrderName = "Updated FlowerArrangementOrder" };
+            var mappedFlowerArrangementOrder = new FlowerArrangementOrder { FlowerArrangementOrderId = FlowerArrangementOrderId, Name = "Updated FlowerArrangementOrder" };
 
             A.CallTo(() => _mapper.Map<FlowerArrangementOrder>(updateDto)).Returns(mappedFlowerArrangementOrder);
             A.CallTo(() => _dbOrderRepo.UpdateFlowerArrangementOrderAsync(A<FlowerArrangementOrder>.Ignored)).Returns(Task.FromResult(mappedFlowerArrangementOrder)); // Change here

@@ -103,7 +103,7 @@ namespace sshBackend1.Controllers
                     return BadRequest("Invalid Flower Arrangement Order data.");
                 }
 
-                if (await _dbFlowerArrangementOrder.GetAsync(u => u.OrderName.ToLower() == createDTO.OrderName.ToLower()) != null)
+                if (await _dbFlowerArrangementOrder.GetAsync(u => u.Name.ToLower() == createDTO.OrderName.ToLower()) != null)
                 {
                     ModelState.AddModelError("ErrorsMessages", "Flower Arrangement Order already exists!");
                     return BadRequest(ModelState);

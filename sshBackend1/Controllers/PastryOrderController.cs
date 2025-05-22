@@ -91,7 +91,7 @@ namespace sshBackend1.Controllers
                     return BadRequest("Invalid pastry order data.");
                 }
 
-                if (await _dbPastryOrder.GetAsync(u => u.OrderName.ToLower() == createDTO.OrderName.ToLower()) != null)
+                if (await _dbPastryOrder.GetAsync(u => u.Name.ToLower() == createDTO.OrderName.ToLower()) != null)
                 {
                     ModelState.AddModelError("ErrorsMessages", "Pastry order already exists!");
                     return BadRequest(ModelState);
