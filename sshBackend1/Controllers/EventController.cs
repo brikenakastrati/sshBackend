@@ -90,7 +90,7 @@ namespace sshBackend1.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Roles = "CLIENT")]
-        [HttpPost]
+
         public async Task<ActionResult<APIResponse>> CreateEvent([FromBody] EventDTO createDTO)
         {
             try
