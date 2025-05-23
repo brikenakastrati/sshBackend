@@ -101,7 +101,7 @@ namespace sshBackend1.Controllers
                     return BadRequest("Invalid Music Provider Order data.");
                 }
 
-                if (await _dbMusicProviderOrder.GetAsync(u => u.OrderName.ToLower() == createDTO.OrderName.ToLower()) != null)
+                if (await _dbMusicProviderOrder.GetAsync(u => u.Name.ToLower() == createDTO.OrderName.ToLower()) != null)
                 {
                     ModelState.AddModelError("ErrorsMessages", "Music Provider Order already exists!");
                     return BadRequest(ModelState);
