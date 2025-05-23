@@ -174,7 +174,7 @@ namespace MagicVilla_VillaAPI.Repository
             var userDto = _mapper.Map<ApplicationUserDTO>(user);
             userDto.Role = roles.FirstOrDefault();
 
-            var token = _jwtHelper.GenerateToken(user.UserName, userDto.Role);
+            var token = _jwtHelper.GenerateToken(user.Id,user.UserName, userDto.Role);
 
             return new LoginResponseDTO
             {
