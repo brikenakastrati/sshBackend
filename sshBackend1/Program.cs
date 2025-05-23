@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using sshBackend1;
 using sshBackend1.Data;
+using sshBackend1.Helpers;
 using sshBackend1.Middleware;
 using sshBackend1.Models;
 using sshBackend1.Repository;
@@ -29,6 +30,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 // 3) Repositories
+builder.Services.AddScoped<IVenueOrderRepository, VenueOrderRepository>();
+
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IVenueRepository, VenueRepository>();
 builder.Services.AddScoped<IVenueProviderRepository, VenueProviderRepository>();
@@ -55,11 +58,11 @@ builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
+builder.Services.AddScoped<JwtTokenHelper>();
 
 // 5) JWT Authentication
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 var keyBytes = Encoding.UTF8.GetBytes(jwtSection["Key"]);
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

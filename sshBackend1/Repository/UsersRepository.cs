@@ -9,6 +9,8 @@ using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace sshBackend1.Repository
 {
@@ -93,6 +95,17 @@ namespace sshBackend1.Repository
             userDto.Role = roles.FirstOrDefault();
 
             return userDto;
+        }
+
+        public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync(Expression<Func<ApplicationUser, bool>> filter = null)
+        {
+            IQueryable<ApplicationUser> query = _db.Users;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return await query.ToListAsync();
         }
     }
 }

@@ -11,5 +11,6 @@ namespace sshBackend1.Repository.IRepository
         bool IsUniqueUser(string username);
         Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO);
         Task<ApplicationUserDTO> Register(RegisterationRequestDTO registerationRequestDTO);
+        Task<IEnumerable<ApplicationUser>> GetAllUsersAsync(Expression<Func<ApplicationUser, bool>> filter = null);
     }
 }
