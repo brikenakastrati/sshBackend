@@ -198,11 +198,11 @@ namespace MagicVilla_VillaAPI.Repository
             // Ensure roles exist
             if (!await _roleManager.RoleExistsAsync("admin"))
                 await _roleManager.CreateAsync(new IdentityRole("admin"));
-            if (!await _roleManager.RoleExistsAsync("client"))
-                await _roleManager.CreateAsync(new IdentityRole("client"));
+            if (!await _roleManager.RoleExistsAsync("CLIENT"))
+                await _roleManager.CreateAsync(new IdentityRole("CLIENT"));
 
             // Assign requested role or default
-            var role = string.IsNullOrWhiteSpace(registerRequestDTO.Role) ? "client" : registerRequestDTO.Role;
+            var role = string.IsNullOrWhiteSpace(registerRequestDTO.Role) ? "CLIENT" : registerRequestDTO.Role;
             await _userManager.AddToRoleAsync(user, role);
 
             var createdUser = await _userManager.FindByNameAsync(user.UserName);

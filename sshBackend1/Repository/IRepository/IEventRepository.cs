@@ -13,6 +13,6 @@ namespace sshBackend1.Repository.IRepository
         Task<Event> UpdateEventAsync(Event entity);
         Task DeleteEventAsync(Event entity);
         Task SaveAsync();
-        void GetAsync(Func<Event, bool> func, object value, bool v);
+      
     }
 }
