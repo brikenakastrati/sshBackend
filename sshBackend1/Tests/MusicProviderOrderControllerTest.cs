@@ -141,7 +141,7 @@ namespace UnitTests.ControllerTests
         {
             // Arrange
             var createDto = new MusicProviderOrderDTO { OrderName = "Test MusicProviderOrder" };
-            var createdEntity = new MusicProviderOrder { MusicProviderOrderId = 1, OrderName = "Test MusicProviderOrder" };
+            var createdEntity = new MusicProviderOrder { MusicProviderOrderId = 1, Name = "Test MusicProviderOrder" };
             var createdDto = new MusicProviderOrderDTO { MusicProviderOrderId = 1, OrderName = "Test MusicProviderOrder" };
 
             A.CallTo(() => _dbMusicProviderOrder.GetAsync(
@@ -173,7 +173,7 @@ namespace UnitTests.ControllerTests
         {
             // Arrange
             var createDto = new MusicProviderOrderDTO { OrderName = "Duplicate MusicProviderOrder" };
-            var existingMusicProviderOrder = new MusicProviderOrder { MusicProviderOrderId = 1, OrderName = "Duplicate MusicProviderOrder" };
+            var existingMusicProviderOrder = new MusicProviderOrder { MusicProviderOrderId = 1, Name = "Duplicate MusicProviderOrder" };
 
             A.CallTo(() => _dbMusicProviderOrder.GetAsync(
                 A<Expression<Func<MusicProviderOrder, bool>>>._, A<bool>._, A<string>._))
@@ -259,7 +259,7 @@ namespace UnitTests.ControllerTests
             var fakeMusicProviderOrder = new MusicProviderOrder
             {
                 MusicProviderOrderId = MusicProviderOrderId,
-                OrderName = "Sample MusicProviderOrder"
+                Name = "Sample MusicProviderOrder"
             };
 
             A.CallTo(() => _dbMusicProviderOrder.GetAsync(A<Expression<Func<MusicProviderOrder, bool>>>._, A<bool>._, A<string>._))
@@ -294,7 +294,7 @@ namespace UnitTests.ControllerTests
             // Arrange
             int MusicProviderOrderId = 1;
             var updateDto = new MusicProviderOrderDTO { MusicProviderOrderId = MusicProviderOrderId, OrderName = "Updated MusicProviderOrder" };
-            var mappedMusicProviderOrder = new MusicProviderOrder { MusicProviderOrderId = MusicProviderOrderId, OrderName = "Updated MusicProviderOrder" };
+            var mappedMusicProviderOrder = new MusicProviderOrder { MusicProviderOrderId = MusicProviderOrderId, Name = "Updated MusicProviderOrder" };
 
             A.CallTo(() => _mapper.Map<MusicProviderOrder>(updateDto)).Returns(mappedMusicProviderOrder);
             A.CallTo(() => _dbMusicProviderOrder.UpdateMusicProviderOrderAsync(A<MusicProviderOrder>.Ignored)).Returns(Task.FromResult(mappedMusicProviderOrder));

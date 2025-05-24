@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using sshBackend1.Models;
 using sshBackend1.Models.DTOs;
 using sshBackend1.Repository.IRepository;
+using sshBackend1.Services.IServices;
 using System.Net;
 
 namespace sshBackend1.Controllers
@@ -13,10 +15,12 @@ namespace sshBackend1.Controllers
     {
         private readonly IUsersRepository _userRepo;
         protected APIResponse _response;
-        public UsersController(IUsersRepository userRepo)
+        private readonly IMapper _mapper;
+        public UsersController(IUsersRepository userRepo, IMapper mapper)
         {
             _userRepo = userRepo;
             _response = new();
+            _mapper = mapper;
         }
 
         [HttpPost("login")]
@@ -59,6 +63,28 @@ namespace sshBackend1.Controllers
             _response.StatusCode = HttpStatusCode.OK;
             _response.IsSuccess = true;
             return Ok(_response);
+        }
+
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetUsers()
+        {
+            try
+            {
+                var users = await _userRepo.GetAllUsersAsync();
+                var userDtos = _mapper.Map<List<ApplicationUserDTO>>(users);
+
+                _response.Result = userDtos;
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorsMessages = new List<string> { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
         }
 
 

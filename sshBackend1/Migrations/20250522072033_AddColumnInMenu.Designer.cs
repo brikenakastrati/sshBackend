@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using sshBackend1.Data;
 
@@ -11,9 +12,11 @@ using sshBackend1.Data;
 namespace sshBackend1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250522072033_AddColumnInMenu")]
+    partial class AddColumnInMenu
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -336,15 +339,8 @@ namespace sshBackend1.Migrations
                     b.Property<double>("AgencyFee")
                         .HasColumnType("float");
 
-                    b.Property<int>("EventId")
+                    b.Property<int?>("EventId")
                         .HasColumnType("int");
-
-                    b.Property<int>("FloristId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Notes")
                         .IsRequired()
@@ -354,17 +350,19 @@ namespace sshBackend1.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("OrderName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("OrderPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("OrderStatusId")
+                    b.Property<int?>("OrderStatusId")
                         .HasColumnType("int");
 
                     b.HasKey("FlowerArrangementOrderId");
 
                     b.HasIndex("EventId");
-
-                    b.HasIndex("FloristId");
 
                     b.HasIndex("OrderStatusId");
 
@@ -511,6 +509,7 @@ namespace sshBackend1.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MusicProviderId");
@@ -530,33 +529,41 @@ namespace sshBackend1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MusicProviderOrderId"));
 
-                    b.Property<double?>("AgencyFee")
+                    b.Property<double>("AgencyFee")
                         .HasColumnType("float");
 
-                    b.Property<int>("EventId")
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("EventId")
                         .HasColumnType("int");
 
-                    b.Property<int>("MusicProviderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("MusicProviderAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Notes")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("OrderPrice")
+                    b.Property<string>("OrderName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("OrderPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("OrderStatusId")
+                    b.Property<int?>("OrderStatusId")
                         .HasColumnType("int");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MusicProviderOrderId");
 
                     b.HasIndex("EventId");
-
-                    b.HasIndex("MusicProviderId");
 
                     b.HasIndex("OrderStatusId");
 
@@ -635,33 +642,33 @@ namespace sshBackend1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PastryOrderId"));
 
-                    b.Property<double?>("AgencyFee")
+                    b.Property<double>("AgencyFee")
                         .HasColumnType("float");
 
-                    b.Property<int>("EventId")
+                    b.Property<int?>("EventId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("OrderPrice")
+                    b.Property<string>("OrderDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrderName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("OrderPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("OrderShopShopId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ShopId")
+                    b.Property<int?>("OrderStatusId")
                         .HasColumnType("int");
 
                     b.HasKey("PastryOrderId");
 
                     b.HasIndex("EventId");
-
-                    b.HasIndex("OrderShopShopId");
 
                     b.HasIndex("OrderStatusId");
 
@@ -804,23 +811,35 @@ namespace sshBackend1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VenueOrderId"));
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Address")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EventId")
+                    b.Property<decimal?>("AgencyFee")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("EventId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("OrderStatusId")
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("OrderStatusId")
                         .HasColumnType("int");
+
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("VenueId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VenueProviderId")
                         .HasColumnType("int");
 
                     b.HasKey("VenueOrderId");
@@ -830,8 +849,6 @@ namespace sshBackend1.Migrations
                     b.HasIndex("OrderStatusId");
 
                     b.HasIndex("VenueId");
-
-                    b.HasIndex("VenueProviderId");
 
                     b.ToTable("VenueOrders");
                 });
@@ -984,25 +1001,13 @@ namespace sshBackend1.Migrations
                 {
                     b.HasOne("sshBackend1.Models.Event", "Event")
                         .WithMany("FlowerArrangementOrders")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("sshBackend1.Models.Florist", "Florist")
-                        .WithMany()
-                        .HasForeignKey("FloristId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EventId");
 
                     b.HasOne("sshBackend1.Models.OrderStatus", "OrderStatus")
                         .WithMany("FlowerArrangementOrders")
-                        .HasForeignKey("OrderStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderStatusId");
 
                     b.Navigation("Event");
-
-                    b.Navigation("Florist");
 
                     b.Navigation("OrderStatus");
                 });
@@ -1050,25 +1055,13 @@ namespace sshBackend1.Migrations
                 {
                     b.HasOne("sshBackend1.Models.Event", "Event")
                         .WithMany("MusicProviderOrders")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("sshBackend1.Models.MusicProvider", "MusicProvider")
-                        .WithMany()
-                        .HasForeignKey("MusicProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EventId");
 
                     b.HasOne("sshBackend1.Models.OrderStatus", "OrderStatus")
                         .WithMany("MusicProviderOrders")
-                        .HasForeignKey("OrderStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderStatusId");
 
                     b.Navigation("Event");
-
-                    b.Navigation("MusicProvider");
 
                     b.Navigation("OrderStatus");
                 });
@@ -1092,25 +1085,13 @@ namespace sshBackend1.Migrations
                 {
                     b.HasOne("sshBackend1.Models.Event", "Event")
                         .WithMany("PastryOrders")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("sshBackend1.Models.PastryShop", "OrderShop")
-                        .WithMany()
-                        .HasForeignKey("OrderShopShopId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EventId");
 
                     b.HasOne("sshBackend1.Models.OrderStatus", "OrderStatus")
                         .WithMany("PastryOrders")
-                        .HasForeignKey("OrderStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderStatusId");
 
                     b.Navigation("Event");
-
-                    b.Navigation("OrderShop");
 
                     b.Navigation("OrderStatus");
                 });
@@ -1154,25 +1135,15 @@ namespace sshBackend1.Migrations
                 {
                     b.HasOne("sshBackend1.Models.Event", "Event")
                         .WithMany("VenueOrders")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EventId");
 
                     b.HasOne("sshBackend1.Models.OrderStatus", "OrderStatus")
                         .WithMany("VenueOrders")
-                        .HasForeignKey("OrderStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderStatusId");
 
-                    b.HasOne("sshBackend1.Models.Venue", null)
+                    b.HasOne("sshBackend1.Models.Venue", "Venue")
                         .WithMany("VenueOrders")
                         .HasForeignKey("VenueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("sshBackend1.Models.VenueProvider", "VenueProvider")
-                        .WithMany()
-                        .HasForeignKey("VenueProviderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1180,7 +1151,7 @@ namespace sshBackend1.Migrations
 
                     b.Navigation("OrderStatus");
 
-                    b.Navigation("VenueProvider");
+                    b.Navigation("Venue");
                 });
 
             modelBuilder.Entity("sshBackend1.Models.VenueProvider", b =>

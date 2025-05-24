@@ -52,10 +52,7 @@ namespace sshBackend1.Repository
             await _db.SaveChangesAsync();
         }
 
-        public void GetAsync(Func<Event, bool> func, object value, bool v)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }
 

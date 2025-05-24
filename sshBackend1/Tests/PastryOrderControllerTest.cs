@@ -113,7 +113,7 @@ namespace UnitTests.ControllerTests
         public async Task CreatePastryOrder_DuplicateOrderName_ReturnsBadRequest()
         {
             var dto = new PastryOrderDTO { OrderName = "Duplicate" };
-            var existing = new PastryOrder { OrderName = "Duplicate" };
+            var existing = new PastryOrder { Name = "Duplicate" };
 
             A.CallTo(() => _dbPastryOrder.GetPastryOrderAsync(A<Expression<Func<PastryOrder, bool>>>._)).Returns(Task.FromResult(existing));
 
@@ -170,7 +170,7 @@ namespace UnitTests.ControllerTests
         [Fact]
         public async Task DeletePastryOrder_ValidId_ReturnsOk()
         {
-            var entity = new PastryOrder { PastryOrderId = 1, OrderName = "DeleteMe" };
+            var entity = new PastryOrder { PastryOrderId = 1, Name = "DeleteMe" };
 
             A.CallTo(() => _dbPastryOrder.GetPastryOrderAsync(A<Expression<Func<PastryOrder, bool>>>._)).Returns(Task.FromResult(entity));
             A.CallTo(() => _dbPastryOrder.DeletePastryOrderAsync(entity)).Returns(Task.CompletedTask);
@@ -187,7 +187,7 @@ namespace UnitTests.ControllerTests
         public async Task UpdatePastryOrder_ValidDto_ReturnsOk()
         {
             var dto = new PastryOrderDTO { PastryOrderId = 1, OrderName = "Updated" };
-            var model = new PastryOrder { PastryOrderId = 1, OrderName = "Updated" };
+            var model = new PastryOrder { PastryOrderId = 1, Name = "Updated" };
 
             A.CallTo(() => _mapper.Map<PastryOrder>(dto)).Returns(model);
             A.CallTo(() => _dbPastryOrder.UpdatePastryOrderAsync(model)).Returns(Task.FromResult(model));

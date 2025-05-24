@@ -32,7 +32,7 @@ namespace sshBackend1.Controllers
         {
             try
             {
-                IEnumerable<Pastry> pastryList = await _dbPastry.GetAllAsync();
+                IEnumerable<Pastry> pastryList = await _dbPastry.GetAllAsync(includeProperties: "Shop");
                 _response.Result = _mapper.Map<List<PastryDTO>>(pastryList);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
