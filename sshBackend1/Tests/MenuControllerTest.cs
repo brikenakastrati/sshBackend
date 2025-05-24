@@ -140,9 +140,9 @@ namespace UnitTests.ControllerTests
         public async Task CreateMenu_ValidInput_ReturnsCreatedAtRoute()
         {
             // Arrange
-            var createDto = new MenuDTO { MenuName = "Test Menu" };
+            var createDto = new MenuDTO { Chef_Name = "Test Menu" };
             var createdEntity = new Menu { MenuId = 1, Chef_Name = "Test Menu" };
-            var createdDto = new MenuDTO { MenuId = 1, MenuName = "Test Menu" };
+            var createdDto = new MenuDTO { MenuId = 1, Chef_Name = "Test Menu" };
 
             A.CallTo(() => _dbMenu.GetAsync(
                 A<Expression<Func<Menu, bool>>>._, A<bool>._, A<string>._))
@@ -172,8 +172,8 @@ namespace UnitTests.ControllerTests
         public async Task CreateMenu_DuplicateMenu_ReturnsBadRequest()
         {
             // Arrange
-            var createDto = new MenuDTO { MenuName = "Duplicate Menu" };
-            var existingMenu = new Menu { MenuId = 1, Chef_Name = "Duplicate Menu" };
+            var createDto = new MenuDTO { Chef_Name = "Duplicate Menu" };
+            var existingMenu = new Menu { MenuId = 1, Chef_Name = "Duplicate Menu" };   
 
             A.CallTo(() => _dbMenu.GetAsync(
                 A<Expression<Func<Menu, bool>>>._, A<bool>._, A<string>._))
@@ -293,7 +293,7 @@ namespace UnitTests.ControllerTests
         {
             // Arrange
             int MenuId = 1;
-            var updateDto = new MenuDTO { MenuId = MenuId, MenuName = "Updated Menu" };
+            var updateDto = new MenuDTO { MenuId = MenuId, Chef_Name = "Updated Menu" };
             var mappedMenu = new Menu { MenuId = MenuId, Chef_Name = "Updated Menu" };
 
             A.CallTo(() => _mapper.Map<Menu>(updateDto)).Returns(mappedMenu);
